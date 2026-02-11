@@ -3,6 +3,8 @@ import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
+import AdminOnly from "@/components/AdminOnly";
+
 async function getProjects() {
   try {
     const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
@@ -32,12 +34,14 @@ export default async function ProjectsPage() {
             <h1 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">프로젝트 쇼케이스</h1>
             <p className="text-xl text-slate-600 max-w-2xl">창의적인 아이디어를 코드로 구현한 저의 결과물들입니다.</p>
           </div>
-          <Link
-            href="/admin/projects/write"
-            className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-100 shrink-0"
-          >
-            <span>🚀 프로젝트 등록</span>
-          </Link>
+          <AdminOnly>
+            <Link
+              href="/admin/projects/write"
+              className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-100 shrink-0"
+            >
+              <span>🚀 프로젝트 등록</span>
+            </Link>
+          </AdminOnly>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

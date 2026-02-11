@@ -1,11 +1,38 @@
 "use server";
 
-import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { adminDb, adminAuth } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+
+// 서버 전용 환경변수 (보안을 위해 NEXT_PUBLIC 제거 버전 사용)
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+
+async function checkAdminAuth() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("__session")?.value;
+
+  if (!token) {
+    throw new Error("인증되지 않은 사용자입니다.");
+  }
+
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    if (decodedToken.email !== ADMIN_EMAIL) {
+      throw new Error("권한이 없습니다.");
+    }
+    return decodedToken;
+  } catch (error) {
+    console.error("Auth Verification Error:", error);
+    throw new Error("관리자 권한 확인에 실패했습니다.");
+  }
+}
 
 export async function createPost(formData: FormData) {
+  // 서버 측에서 완벽한 권한 확인
+  await checkAdminAuth();
+
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const category = formData.get("category") as string;
@@ -18,7 +45,7 @@ export async function createPost(formData: FormData) {
   }
 
   try {
-    await addDoc(collection(db, "posts"), {
+    await adminDb.collection("posts").add({
       title,
       description,
       category,
@@ -26,7 +53,7 @@ export async function createPost(formData: FormData) {
       content,
       image,
       date: new Date().toISOString().split("T")[0],
-      createdAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
     });
   } catch (error) {
     console.error("Error adding document: ", error);

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
+import AdminOnly from "@/components/AdminOnly";
+
 // This is a server component by default
 async function getPosts() {
   try {
@@ -32,12 +34,14 @@ export default async function ArticlesPage() {
             <h1 className="text-4xl font-extrabold text-slate-900 mb-4">모든 글 목록</h1>
             <p className="text-lg text-slate-600">제가 작성한 모든 기술 아티클과 생각을 모아두었습니다.</p>
           </div>
-          <Link
-            href="/admin/write"
-            className="px-6 py-3 bg-indigo-600 text-white rounded-full font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 inline-flex items-center space-x-2"
-          >
-            <span>✍️ 새 글 작성</span>
-          </Link>
+          <AdminOnly>
+            <Link
+              href="/admin/write"
+              className="px-6 py-3 bg-indigo-600 text-white rounded-full font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 inline-flex items-center space-x-2"
+            >
+              <span>✍️ 새 글 작성</span>
+            </Link>
+          </AdminOnly>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
