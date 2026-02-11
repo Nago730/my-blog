@@ -1,13 +1,25 @@
 import { mockPosts } from "../../../data/posts";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import MarkdownIt from "markdown-it";
 
 export default function ArticleDetail({ params }: { params: { id: string } }) {
+  const md = new MarkdownIt({
+    html: true,
+    linkify: true,
+    typographer: true,
+  });
+
   const post = mockPosts.find((p) => p.id === params.id);
 
   if (!post) {
     notFound();
   }
+
+  // 데이터의 앞뒤 공백을 제거하고, 행별 들여쓰기가 있는 경우를 대비해 처리할 수 있습니다.
+  // 나중에 Firebase에서 데이터를 가져올 때도 유용합니다.
+  const cleanContent = post.content.trim();
+  const htmlContent = md.render(cleanContent);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100">
@@ -44,15 +56,10 @@ export default function ArticleDetail({ params }: { params: { id: string } }) {
           </div>
 
           {/* Content */}
-          <div className="prose prose-slate lg:prose-xl prose-indigo max-w-none">
-            {/* 
-                실제 마크다운 렌더러를 사용하는 것이 좋지만, 
-                현재는 간단히 줄바꿈을 처리하여 출력합니다.
-            */}
-            <div className="whitespace-pre-line text-slate-700 leading-8">
-              {post.content}
-            </div>
-          </div>
+          <div
+            className="prose prose-slate lg:prose-xl prose-indigo max-w-none"
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
+          />
 
           {/* Footer of the article */}
           <div className="mt-20 pt-10 border-t border-slate-100">

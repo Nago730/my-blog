@@ -1,13 +1,17 @@
 import { mockProjects } from "../../../data/projects";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import MarkdownIt from "markdown-it";
 
 export default function ProjectDetail({ params }: { params: { id: string } }) {
+  const md = new MarkdownIt();
   const project = mockProjects.find((p) => p.id === params.id);
 
   if (!project) {
     notFound();
   }
+
+  const htmlContent = md.render(project.detailContent);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
@@ -49,9 +53,10 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
-              <section className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm leading-relaxed whitespace-pre-line text-slate-700">
-                {project.detailContent}
-              </section>
+              <section
+                className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm prose prose-slate max-w-none"
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+              />
             </div>
 
             {/* Sidebar info */}

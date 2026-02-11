@@ -1,11 +1,60 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @layer base {
   html {
     scroll-behavior: smooth;
   }
 
-  * {
-    @apply transition-colors duration-200;
+  body {
+    @apply antialiased bg-white text-slate-900;
+  }
+}
+
+/* Custom Prose Enhancements */
+@layer utilities {
+  .prose {
+    --tw-prose-body: var(--color-slate-700);
+    --tw-prose-headings: var(--color-slate-900);
+    --tw-prose-links: var(--color-indigo-600);
+    --tw-prose-bold: var(--color-slate-900);
+    --tw-prose-code: var(--color-indigo-600);
+    --tw-prose-quotes: var(--color-slate-500);
+  }
+
+  /* Inline code styling */
+  .prose :not(pre)>code {
+    @apply px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-semibold text-[0.9em];
+
+    &::before {
+      content: "" !important;
+    }
+
+    &::after {
+      content: "" !important;
+    }
+  }
+
+  /* Code block styling */
+  .prose pre {
+    @apply rounded-2xl bg-slate-900 shadow-2xl p-6 border border-slate-800 my-8;
+  }
+
+  .prose pre code {
+    @apply text-sm text-slate-200 bg-transparent p-0;
+  }
+
+  /* Heading customizations */
+  .prose h2 {
+    @apply text-2xl md:text-3xl font-extrabold mt-12 mb-6 tracking-tight text-slate-900;
+  }
+
+  .prose h3 {
+    @apply text-xl md:text-2xl font-bold mt-10 mb-4 tracking-tight text-slate-900;
+  }
+
+  /* Blockquote styling */
+  .prose blockquote {
+    @apply border-l-4 border-indigo-500 bg-indigo-50/50 py-4 px-6 rounded-r-xl italic;
   }
 }
