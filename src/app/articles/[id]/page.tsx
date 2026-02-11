@@ -2,21 +2,19 @@ import { mockPosts } from "../../../data/posts";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 
 async function getPost(id: string) {
   try {
-    const docRef = doc(db, "posts", id);
-    const docSnap = await getDoc(docRef);
+    const docSnap = await adminDb.collection("posts").doc(id).get();
 
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       return { id: docSnap.id, ...docSnap.data() } as any;
     }
 
     return mockPosts.find((p) => p.id === id);
   } catch (error) {
-    console.error("Firebase fetch error:", error);
+    console.error("Firebase admin fetch error:", error);
     return mockPosts.find((p) => p.id === id);
   }
 }
