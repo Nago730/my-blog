@@ -14,7 +14,7 @@ export default function ArticlesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {mockPosts.map((post) => (
-            <div key={post.id} className="group cursor-pointer bg-white p-2 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1">
+            <Link href={`/articles/${post.id}`} key={post.id} className="group cursor-pointer bg-white p-2 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1 block">
               <div className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] bg-slate-100 mb-6 transition-transform">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20" />
                 <div className="absolute bottom-4 left-4">
@@ -36,7 +36,7 @@ export default function ArticlesPage() {
                   {post.description}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

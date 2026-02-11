@@ -49,7 +49,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredPosts.map((post) => (
-              <div key={post.id} className="group cursor-pointer">
+              <Link href={`/articles/${post.id}`} key={post.id} className="group cursor-pointer block text-slate-900 no-underline">
                 <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-slate-100 mb-6 transition-transform transform group-hover:-translate-y-2">
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20" />
                   <div className="absolute bottom-4 left-4">
@@ -66,10 +66,10 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">
                   {post.title}
                 </h3>
-                <p className="text-slate-600 line-clamp-2">
+                <p className="text-slate-500 line-clamp-2">
                   {post.description}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
