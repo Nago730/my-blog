@@ -21,14 +21,15 @@ async function getProject(id: string) {
   }
 }
 
-export default async function ProjectDetail({ params }: { params: { id: string } }) {
+export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const md = new MarkdownIt({
     html: true,
     linkify: true,
     typographer: true,
     breaks: true,
   });
-  const project = await getProject(params.id);
+  const project = await getProject(id);
 
   if (!project) {
     notFound();

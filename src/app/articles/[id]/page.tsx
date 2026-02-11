@@ -21,7 +21,8 @@ async function getPost(id: string) {
   }
 }
 
-export default async function ArticleDetail({ params }: { params: { id: string } }) {
+export default async function ArticleDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const md = new MarkdownIt({
     html: true,
     linkify: true,
@@ -29,7 +30,7 @@ export default async function ArticleDetail({ params }: { params: { id: string }
     breaks: true,
   });
 
-  const post = await getPost(params.id);
+  const post = await getPost(id);
 
   if (!post) {
     notFound();
