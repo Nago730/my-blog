@@ -15,7 +15,7 @@ export default function Navbar() {
             <Link href="/" className="hover:text-indigo-600 transition-colors">홈</Link>
             <Link href="/articles" className="hover:text-indigo-600 transition-colors">글 목록</Link>
             <Link href="/projects" className="hover:text-indigo-600 transition-colors">프로젝트</Link>
-            <Link href="#" className="hover:text-indigo-600 transition-colors">소개</Link>
+            <Link href="/about" className="hover:text-indigo-600 transition-colors">소개</Link>
           </div>
           <div>
             <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg shadow-indigo-200">
