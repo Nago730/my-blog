@@ -84,7 +84,7 @@ export default function AboutPage() {
       <footer className="py-10 border-t border-slate-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-slate-500 text-sm">
-            &copy; 2026 MyBlog by Nago730. All rights reserved.
+            &copy; 2026 Jun's Blog. All rights reserved.
           </p>
         </div>
       </footer>

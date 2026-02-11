@@ -24,7 +24,7 @@ export default function NotFound() {
       {/* Decorative elements */}
       <div className="mt-12 flex items-center space-x-2 text-slate-300">
         <div className="w-12 h-px bg-slate-100"></div>
-        <span className="text-[10px] font-mono tracking-widest uppercase">My Blog Security System</span>
+        <span className="text-[10px] font-mono tracking-widest uppercase">Jun's Blog Security System</span>
         <div className="w-12 h-px bg-slate-100"></div>
       </div>
     </main>

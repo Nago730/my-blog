@@ -19,11 +19,12 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-6">
-            저의 디지털 공간에 오신 것을 환영합니다
+          <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-widest mb-6">
+            Welcome to my digital garden
           </span>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
-            이야기, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">코드</span> 그리고 삶을 나눕니다.
+            안녕하세요, <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">개발자 Jun</span>의 블로그입니다.
           </h1>
           <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
             웹 개발의 경계를 탐구하고 기술 세계를 여행하는 저의 여정을 공유하는 공간입니다.
@@ -83,7 +84,7 @@ export default async function Home() {
 
       {/* Featured Projects */}
       <section className="py-24 bg-slate-50 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <div className="space-y-4">
               <h2 className="text-4xl font-black text-slate-900 tracking-tight">프로젝트 쇼케이스</h2>
@@ -133,16 +134,13 @@ export default async function Home() {
       {/* Footer */}
       <footer className="py-20 border-t border-slate-200 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-slate-900 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-xs">M</span>
-              </div>
-              <span className="text-lg font-bold tracking-tight">내 블로그</span>
+          <div className="flex items-center justify-center mb-8">
+            <Link href="/" className="group">
+              <span className="text-xl font-syne font-light tracking-[0.2em] text-slate-900 group-hover:text-indigo-600 transition-colors uppercase">Jun's Blog</span>
             </Link>
           </div>
           <p className="text-slate-500 text-sm mb-8">
-            &copy; 2026 MyBlog by Nago730. Next.js와 Tailwind CSS로 제작되었습니다.
+            &copy; 2026 Jun's Blog. 고민하고 기록하며 함께 성장하는 공간입니다.
           </p>
           <div className="flex justify-center space-x-6 text-slate-400">
             <a href="#" className="hover:text-slate-600 transition-colors font-medium">Twitter</a>

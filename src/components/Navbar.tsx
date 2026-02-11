@@ -24,11 +24,8 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-20 bg-white/80 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center space-x-2 cursor-pointer">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg transform hover:rotate-6 transition-transform">
-              <span className="text-white font-black text-xl">M</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">내 블로그</span>
+          <Link href="/" className="flex items-center cursor-pointer group">
+            <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">Jun's Blog</span>
           </Link>
 
           <div className="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
