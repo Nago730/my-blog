@@ -1,15 +1,17 @@
 import { mockPosts } from "../../data/posts";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 
 import AdminOnly from "@/components/AdminOnly";
 
-// This is a server component by default
+// 서버 컴포넌트이므로 adminDb (서버 SDK)를 사용하여 API Key 이슈 회피
 async function getPosts() {
   try {
-    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await adminDb
+      .collection("posts")
+      .orderBy("createdAt", "desc")
+      .get();
+
     const firebasePosts = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -18,7 +20,7 @@ async function getPosts() {
     if (firebasePosts.length === 0) return mockPosts;
     return firebasePosts;
   } catch (error) {
-    console.error("Firebase fetch error, falling back to mock data:", error);
+    console.error("Firebase admin fetch error, falling back to mock data:", error);
     return mockPosts;
   }
 }
