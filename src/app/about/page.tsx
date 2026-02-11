@@ -1,10 +1,8 @@
 import Link from "next/link";
-import Navbar from "../../components/Navbar";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
-      <Navbar />
 
       <main className="pt-32 pb-20">
         <div className="max-w-4xl mx-auto px-4">

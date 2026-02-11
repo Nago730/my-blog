@@ -1,5 +1,4 @@
 import { mockProjects } from "../../../data/projects";
-import Navbar from "../../../components/Navbar";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -12,7 +11,6 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
-      <Navbar />
 
       <main className="pt-32 pb-20">
         <div className="max-w-4xl mx-auto px-4">

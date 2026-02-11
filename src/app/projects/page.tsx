@@ -1,11 +1,9 @@
 import { mockProjects } from "../../data/projects";
 import Link from "next/link";
-import Navbar from "../../components/Navbar";
 
 export default function ProjectsPage() {
   return (
     <div className="min-h-screen bg-slate-50 pt-32 pb-20 text-slate-900">
-      <Navbar />
       <div className="max-w-7xl mx-auto px-4">
 
         <div className="mb-12">

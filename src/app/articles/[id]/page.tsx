@@ -1,5 +1,4 @@
 import { mockPosts } from "../../../data/posts";
-import Navbar from "../../../components/Navbar";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -12,7 +11,6 @@ export default function ArticleDetail({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100">
-      <Navbar />
 
       <main className="pt-32 pb-20">
         <article className="max-w-3xl mx-auto px-4">

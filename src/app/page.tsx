@@ -1,16 +1,11 @@
 import { mockPosts } from "../data/posts";
 import Link from "next/link";
-import Navbar from "../components/Navbar";
 
 export default function Home() {
   const featuredPosts = mockPosts.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
-      <Navbar />
-
-      {/* Hero Section */}
-
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
