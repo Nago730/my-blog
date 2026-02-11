@@ -37,7 +37,7 @@ export default function ArticleDetail({ params }: { params: { id: string } }) {
           </div>
 
           {/* Featured Image Placeholder */}
-          <div className="aspect-[21/9] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl mb-12 flex items-center justify-center text-4xl overflow-hidden">
+          <div className="aspect-[21/9] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl mb-12 flex items-center justify-center text-4xl overflow-hidden relative">
             {/* post.image가 있다면 여기에 표시 */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10" />
             🎨
@@ -75,6 +75,6 @@ export default function ArticleDetail({ params }: { params: { id: string } }) {
       </main>
 
       {/* Recommended Articles Section could go here */}
-    </div>
+    </div >
   );
 }
