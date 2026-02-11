@@ -14,8 +14,8 @@ export default function ArticleDetail({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100">
       <Navbar />
 
-      <main className="pt-32 pb-20 px-4">
-        <article className="max-w-3xl mx-auto">
+      <main className="pt-32 pb-20">
+        <article className="max-w-3xl mx-auto px-4">
           {/* Metadata */}
           <div className="mb-8">
             <Link href="/articles" className="text-indigo-600 font-semibold text-sm hover:underline mb-8 inline-block">

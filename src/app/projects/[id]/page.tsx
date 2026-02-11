@@ -14,8 +14,8 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
       <Navbar />
 
-      <main className="pt-32 pb-20 px-4">
-        <div className="max-w-4xl mx-auto">
+      <main className="pt-32 pb-20">
+        <div className="max-w-4xl mx-auto px-4">
           {/* Header */}
           <div className="mb-12">
             <Link href="/projects" className="text-indigo-600 font-semibold text-sm hover:underline mb-8 inline-block">

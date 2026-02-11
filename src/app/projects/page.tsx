@@ -4,9 +4,9 @@ import Navbar from "../../components/Navbar";
 
 export default function ProjectsPage() {
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 pb-20 px-4 text-slate-900">
+    <div className="min-h-screen bg-slate-50 pt-32 pb-20 text-slate-900">
       <Navbar />
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4">
 
         <div className="mb-12">
           <h1 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">프로젝트 쇼케이스</h1>

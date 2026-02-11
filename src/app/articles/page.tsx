@@ -4,9 +4,9 @@ import Navbar from "../../components/Navbar";
 
 export default function ArticlesPage() {
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-slate-50 pt-32 pb-20">
       <Navbar />
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="mb-12">
           <h1 className="text-4xl font-extrabold text-slate-900 mb-4">모든 글 목록</h1>
           <p className="text-lg text-slate-600">제가 작성한 모든 기술 아티클과 생각을 모아두었습니다.</p>

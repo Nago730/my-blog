@@ -6,8 +6,8 @@ export default function AboutPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
       <Navbar />
 
-      <main className="pt-32 pb-20 px-4">
-        <div className="max-w-4xl mx-auto">
+      <main className="pt-32 pb-20">
+        <div className="max-w-4xl mx-auto px-4">
           {/* Header */}
           <div className="mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">안녕하세요, <br /><span className="text-indigo-600">성장하는 개발자</span>입니다.</h1>
