@@ -4,6 +4,13 @@ import { createPost } from "@/app/actions/posts";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
+import Script from "next/script";
+
+declare global {
+  interface Window {
+    cloudinary: any;
+  }
+}
 
 export default function WritePage() {
   const [isPending, setIsPending] = useState(false);
@@ -27,6 +34,48 @@ export default function WritePage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsPending(true);
+  };
+
+  const handleUpload = () => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      console.error("Cloudinary 설정이 누락되었습니다. .env.local 파일을 확인해 주세요.");
+      alert("업로드 설정(Cloud Name, Upload Preset)이 되어있지 않습니다. 환경 변수를 설정해 주세요.");
+      return;
+    }
+
+    if (typeof window !== 'undefined' && window.cloudinary) {
+      try {
+        const widget = window.cloudinary.createUploadWidget(
+          {
+            cloudName: cloudName,
+            uploadPreset: uploadPreset,
+            maxFiles: 1,
+            multiple: false,
+            clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
+            theme: "minimal", // 디자인에 맞게 미니멀 테마 적용
+          },
+          (error: any, result: any) => {
+            if (!error && result && result.event === "success") {
+              const uploadedUrl = result.info.secure_url;
+              setImage(uploadedUrl);
+              widget.close();
+            }
+            if (error) {
+              console.error("Cloudinary Widget Error:", error);
+            }
+          }
+        );
+        widget.open();
+      } catch (err) {
+        console.error("Cloudinary Widget Initialization Failed:", err);
+        alert("업로더를 실행하는 중 오류가 발생했습니다.");
+      }
+    } else {
+      alert("이미지 업로더 스크립트를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
+    }
   };
 
   return (
@@ -122,16 +171,41 @@ export default function WritePage() {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">REPRESENTATIVE IMAGE URL</label>
-                <input
-                  type="text"
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                  placeholder="이미지 URL을 입력하세요 (예: https://...)"
-                  className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                  name="image"
-                  form="write-form"
-                />
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">REPRESENTATIVE IMAGE</label>
+                <div className="flex gap-3">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={image}
+                      onChange={(e) => setImage(e.target.value)}
+                      placeholder="이미지 URL을 입력하거나 파일을 업로드하세요"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all pr-10"
+                      name="image"
+                      form="write-form"
+                    />
+                    {image && (
+                      <button
+                        onClick={() => setImage("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
+                        title="이미지 삭제"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleUpload}
+                    className="px-4 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all flex items-center gap-2 shrink-0 group"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>파일 업로드</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -197,6 +271,12 @@ export default function WritePage() {
             />
           </div>
         </section>
+
+        {/* Cloudinary Script */}
+        <Script
+          src="https://upload-widget.cloudinary.com/global/all.js"
+          strategy="lazyOnload"
+        />
       </main>
     </div>
   );
