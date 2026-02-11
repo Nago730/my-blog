@@ -34,15 +34,19 @@ export default async function ArticlesPage() {
   return (
     <div className="min-h-screen bg-slate-50 pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-extrabold text-slate-900 mb-4">모든 글 목록</h1>
-            <p className="text-lg text-slate-600">제가 작성한 모든 기술 아티클과 생각을 모아두었습니다.</p>
+        <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              모든 글 목록
+            </h1>
+            <p className="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
+              제가 작성한 모든 기술 아티클과 생각을 모아두었습니다.
+            </p>
           </div>
           <AdminOnly>
             <Link
               href="/admin/write"
-              className="px-6 py-3 bg-indigo-600 text-white rounded-full font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 inline-flex items-center space-x-2"
+              className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-100 flex items-center space-x-2 hover:-translate-y-1 active:scale-95"
             >
               <span>✍️ 새 글 작성</span>
             </Link>

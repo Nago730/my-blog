@@ -33,15 +33,19 @@ export default async function ProjectsPage() {
     <div className="min-h-screen bg-slate-50 pt-32 pb-20 text-slate-900">
       <div className="max-w-7xl mx-auto px-4">
 
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">프로젝트 쇼케이스</h1>
-            <p className="text-xl text-slate-600 max-w-2xl">창의적인 아이디어를 코드로 구현한 저의 결과물들입니다.</p>
+        <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              프로젝트 쇼케이스
+            </h1>
+            <p className="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
+              창의적인 아이디어를 코드로 구현한 저의 결과물들입니다.
+            </p>
           </div>
           <AdminOnly>
             <Link
               href="/admin/projects/write"
-              className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-100 shrink-0"
+              className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-100 flex items-center space-x-2 hover:-translate-y-1 active:scale-95"
             >
               <span>🚀 프로젝트 등록</span>
             </Link>
