@@ -4,14 +4,19 @@ import Link from "next/link";
 import MarkdownIt from "markdown-it";
 
 export default function ProjectDetail({ params }: { params: { id: string } }) {
-  const md = new MarkdownIt();
+  const md = new MarkdownIt({
+    html: true,
+    linkify: true,
+    typographer: true,
+  });
   const project = mockProjects.find((p) => p.id === params.id);
 
   if (!project) {
     notFound();
   }
 
-  const htmlContent = md.render(project.detailContent);
+  const cleanContent = project.detailContent.trim();
+  const htmlContent = md.render(cleanContent);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
