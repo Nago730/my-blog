@@ -27,11 +27,11 @@
     @apply px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-semibold text-[0.9em];
 
     &::before {
-      content: "" !important;
+      content: none !important;
     }
 
     &::after {
-      content: "" !important;
+      content: none !important;
     }
   }
 
@@ -56,5 +56,10 @@
   /* Blockquote styling */
   .prose blockquote {
     @apply border-l-4 border-indigo-500 bg-indigo-50/50 py-4 px-6 rounded-r-xl italic;
+  }
+
+  .prose blockquote p::before,
+  .prose blockquote p::after {
+    content: none !important;
   }
 }

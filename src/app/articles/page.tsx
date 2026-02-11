@@ -1,17 +1,47 @@
 import { mockPosts } from "../../data/posts";
 import Link from "next/link";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
-export default function ArticlesPage() {
+// This is a server component by default
+async function getPosts() {
+  try {
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    const firebasePosts = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as any[];
+
+    if (firebasePosts.length === 0) return mockPosts;
+    return firebasePosts;
+  } catch (error) {
+    console.error("Firebase fetch error, falling back to mock data:", error);
+    return mockPosts;
+  }
+}
+
+export default async function ArticlesPage() {
+  const posts = await getPosts();
+
   return (
     <div className="min-h-screen bg-slate-50 pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-12">
-          <h1 className="text-4xl font-extrabold text-slate-900 mb-4">모든 글 목록</h1>
-          <p className="text-lg text-slate-600">제가 작성한 모든 기술 아티클과 생각을 모아두었습니다.</p>
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-extrabold text-slate-900 mb-4">모든 글 목록</h1>
+            <p className="text-lg text-slate-600">제가 작성한 모든 기술 아티클과 생각을 모아두었습니다.</p>
+          </div>
+          <Link
+            href="/admin/write"
+            className="px-6 py-3 bg-indigo-600 text-white rounded-full font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 inline-flex items-center space-x-2"
+          >
+            <span>✍️ 새 글 작성</span>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockPosts.map((post) => (
+          {posts.map((post) => (
             <Link href={`/articles/${post.id}`} key={post.id} className="group cursor-pointer bg-white p-2 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1 block">
               <div className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] bg-slate-100 mb-6 transition-transform">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20" />

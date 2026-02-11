@@ -2,23 +2,41 @@ import { mockPosts } from "../../../data/posts";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-export default function ArticleDetail({ params }: { params: { id: string } }) {
+async function getPost(id: string) {
+  try {
+    const docRef = doc(db, "posts", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as any;
+    }
+
+    return mockPosts.find((p) => p.id === id);
+  } catch (error) {
+    console.error("Firebase fetch error:", error);
+    return mockPosts.find((p) => p.id === id);
+  }
+}
+
+export default async function ArticleDetail({ params }: { params: { id: string } }) {
   const md = new MarkdownIt({
     html: true,
     linkify: true,
     typographer: true,
+    breaks: true,
   });
 
-  const post = mockPosts.find((p) => p.id === params.id);
+  const post = await getPost(params.id);
 
   if (!post) {
     notFound();
   }
 
   // 데이터의 앞뒤 공백을 제거하고, 행별 들여쓰기가 있는 경우를 대비해 처리할 수 있습니다.
-  // 나중에 Firebase에서 데이터를 가져올 때도 유용합니다.
-  const cleanContent = post.content.trim();
+  const cleanContent = typeof post.content === 'string' ? post.content.trim() : '';
   const htmlContent = md.render(cleanContent);
 
   return (
@@ -48,11 +66,16 @@ export default function ArticleDetail({ params }: { params: { id: string } }) {
             </p>
           </div>
 
-          {/* Featured Image Placeholder */}
-          <div className="aspect-[21/9] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl mb-12 flex items-center justify-center text-4xl overflow-hidden relative">
-            {/* post.image가 있다면 여기에 표시 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10" />
-            🎨
+          {/* Featured Image */}
+          <div className="aspect-[21/9] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl mb-12 flex items-center justify-center text-4xl overflow-hidden relative shadow-2xl shadow-indigo-100/50">
+            {post.image ? (
+              <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+            ) : (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10" />
+                🎨
+              </>
+            )}
           </div>
 
           {/* Content */}
