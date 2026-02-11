@@ -2,20 +2,39 @@ import { mockProjects } from "../../../data/projects";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-export default function ProjectDetail({ params }: { params: { id: string } }) {
+async function getProject(id: string) {
+  try {
+    const docRef = doc(db, "projects", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as any;
+    }
+
+    return mockProjects.find((p) => p.id === id);
+  } catch (error) {
+    console.error("Firebase fetch error:", error);
+    return mockProjects.find((p) => p.id === id);
+  }
+}
+
+export default async function ProjectDetail({ params }: { params: { id: string } }) {
   const md = new MarkdownIt({
     html: true,
     linkify: true,
     typographer: true,
+    breaks: true,
   });
-  const project = mockProjects.find((p) => p.id === params.id);
+  const project = await getProject(params.id);
 
   if (!project) {
     notFound();
   }
 
-  const cleanContent = project.detailContent.trim();
+  const cleanContent = typeof project.detailContent === 'string' ? project.detailContent.trim() : '';
   const htmlContent = md.render(cleanContent);
 
   return (
@@ -30,11 +49,16 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
             </Link>
 
             <div className="flex flex-wrap gap-2 mb-6">
-              {project.tags.map((tag) => (
+              {project.tags?.map((tag: string) => (
                 <span key={tag} className="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold uppercase tracking-wider rounded-full">
                   {tag}
                 </span>
               ))}
+              {project.featured && (
+                <span className="px-3 py-1 bg-amber-50 text-amber-600 text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
+                  ★ FEATURED
+                </span>
+              )}
             </div>
 
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6 leading-tight">
@@ -46,12 +70,18 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
             </p>
           </div>
 
-          {/* Project Preview Image Placeholder */}
-          <div className="aspect-video bg-white rounded-[2.5rem] border border-slate-200 mb-16 relative overflow-hidden shadow-xl shadow-slate-200/50">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/5" />
-            <div className="absolute inset-0 flex items-center justify-center text-6xl">
-              🚀
-            </div>
+          {/* Project Preview Image */}
+          <div className="aspect-video bg-white rounded-[2.5rem] border border-slate-200 mb-16 relative overflow-hidden shadow-2xl shadow-slate-200/50">
+            {project.image ? (
+              <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+            ) : (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/5" />
+                <div className="absolute inset-0 flex items-center justify-center text-6xl">
+                  🚀
+                </div>
+              </>
+            )}
           </div>
 
           {/* Content Grid */}
@@ -59,7 +89,7 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               <section
-                className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm prose prose-slate max-w-none"
+                className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm prose prose-slate lg:prose-lg max-w-none"
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               />
             </div>
@@ -72,18 +102,20 @@ export default function ProjectDetail({ params }: { params: { id: string } }) {
                 <div className="space-y-6">
                   <div>
                     <p className="text-xs text-slate-400 mb-1 uppercase tracking-tighter">역할</p>
-                    <p className="font-semibold">Fullstack Developer</p>
+                    <p className="font-semibold">{project.role || "Fullstack Developer"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 mb-1 uppercase tracking-tighter">기간</p>
-                    <p className="font-semibold">2025.10 - 2025.12</p>
+                    <p className="font-semibold">{project.period || "2024.01 - 진행 중"}</p>
                   </div>
                   <div className="pt-4 border-t border-slate-800 space-y-3">
-                    <a href={project.link} className="flex items-center justify-center space-x-2 w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-bold transition-all text-sm">
-                      <span>라이브 데모 보기</span>
-                    </a>
+                    {project.link && (
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center space-x-2 w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-bold transition-all text-sm">
+                        <span>라이브 데모 보기</span>
+                      </a>
+                    )}
                     {project.github && (
-                      <a href={project.github} className="flex items-center justify-center space-x-2 w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center space-x-2 w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
                         <span>GitHub 저장소</span>
                       </a>
                     )}
