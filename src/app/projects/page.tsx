@@ -1,14 +1,18 @@
 import { mockProjects } from "../../data/projects";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 
 import AdminOnly from "@/components/AdminOnly";
 
+export const revalidate = false;
+
 async function getProjects() {
   try {
-    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await adminDb
+      .collection("projects")
+      .orderBy("createdAt", "desc")
+      .get();
+
     const firebaseProjects = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -17,7 +21,7 @@ async function getProjects() {
     if (firebaseProjects.length === 0) return mockProjects;
     return firebaseProjects;
   } catch (error) {
-    console.error("Firebase fetch error, falling back to mock data:", error);
+    console.error("Firebase admin fetch error, falling back to mock data:", error);
     return mockProjects;
   }
 }
