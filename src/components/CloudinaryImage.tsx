@@ -1,6 +1,6 @@
 "use client";
 
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
 
 interface CloudinaryImageProps {
   src: string;
@@ -9,6 +9,36 @@ interface CloudinaryImageProps {
   width?: number;
   height?: number;
   priority?: boolean;
+}
+
+// Extract publicId from Cloudinary URL
+function extractPublicId(url: string): string {
+  try {
+    // Example URL: https://res.cloudinary.com/divweajsy/image/upload/v1770899921/my-portfolio/xaxelu3r91asua9zslaq.jpg
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.\w+)?$/);
+    if (match && match[1]) {
+      return match[1];
+    }
+    return url;
+  } catch {
+    return url;
+  }
+}
+
+// Cloudinary loader for Next.js Image
+function cloudinaryLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "divweajsy";
+  const publicId = extractPublicId(src);
+
+  // Build Cloudinary URL with transformations
+  const params = [
+    `w_${width}`,
+    `q_${quality || 'auto'}`,
+    'f_auto', // automatic format selection (WebP, AVIF, etc.)
+    'c_limit', // don't upscale
+  ];
+
+  return `https://res.cloudinary.com/${cloudName}/image/upload/${params.join(',')}/${publicId}`;
 }
 
 export default function CloudinaryImage({
@@ -30,7 +60,7 @@ export default function CloudinaryImage({
     );
   }
 
-  // Cloudinary URL 인지 확인 (이미 full URL인 경우 public ID 추출 시도)
+  // Cloudinary URL 인지 확인
   const isCloudinary = src.includes("cloudinary.com");
 
   if (!isCloudinary) {
@@ -44,22 +74,20 @@ export default function CloudinaryImage({
     );
   }
 
-  // URL에서 public ID 추출 시도 (복잡한 경우를 대비해 최대한 src를 그대로 활용하거나 publicId만 추출)
-  // next-cloudinary의 CldImage는 src에 full URL이 들어가도 동작하지만, 
-  // 보통은 publicId를 권장함. 여기서는 src를 그대로 넘겨도 내부적으로 처리됨.
-
+  // Use Next.js Image with Cloudinary loader for optimization
   return (
-    <CldImage
+    <Image
+      loader={cloudinaryLoader}
       src={src}
       alt={alt}
       width={width}
       height={height}
       className={className}
-      crop="fill"
-      gravity="auto"
+      priority={priority}
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      quality={85}
       placeholder="blur"
       blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+Z9PQAI8AKp767S2wAAAABJRU5ErkJggg=="
-      priority={priority}
     />
   );
 }
