@@ -4,6 +4,7 @@ import Link from "next/link";
 import MarkdownIt from "markdown-it";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import CloudinaryImage from "@/components/CloudinaryImage";
 
 async function getProject(id: string) {
   try {
@@ -73,8 +74,15 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
 
           {/* Project Preview Image */}
           <div className="aspect-video bg-white rounded-[2.5rem] border border-slate-200 mb-16 relative overflow-hidden shadow-2xl shadow-slate-200/50">
-            {project.image ? (
-              <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+            {project.image?.url ? (
+              <CloudinaryImage
+                src={project.image.url}
+                alt={project.image.alt || project.title}
+                width={1200}
+                height={675}
+                priority
+                className="w-full h-full object-cover"
+              />
             ) : (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/5" />

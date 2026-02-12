@@ -1,6 +1,7 @@
 "use client";
 
 import { createPost } from "@/app/actions/posts";
+import { getCloudinarySignature } from "@/app/actions/cloudinary";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
@@ -20,6 +21,7 @@ export default function WritePage() {
   const [category, setCategory] = useState("개발");
   const [readTime, setReadTime] = useState("");
   const [image, setImage] = useState("");
+  const [publicId, setPublicId] = useState("");
 
   const md = useMemo(() => new MarkdownIt({
     html: true,
@@ -36,31 +38,33 @@ export default function WritePage() {
     setIsPending(true);
   };
 
-  const handleUpload = () => {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  const handleUpload = async () => {
+    try {
+      const signatureData = await getCloudinarySignature("signed_posts");
+      const { signature, timestamp, apiKey, cloudName, uploadPreset } = signatureData;
 
-    if (!cloudName || !uploadPreset) {
-      console.error("Cloudinary 설정이 누락되었습니다. .env.local 파일을 확인해 주세요.");
-      alert("업로드 설정(Cloud Name, Upload Preset)이 되어있지 않습니다. 환경 변수를 설정해 주세요.");
-      return;
-    }
-
-    if (typeof window !== 'undefined' && window.cloudinary) {
-      try {
+      if (typeof window !== 'undefined' && window.cloudinary) {
         const widget = window.cloudinary.createUploadWidget(
           {
             cloudName: cloudName,
+            apiKey: apiKey,
+            uploadSignatureTimestamp: timestamp,
+            uploadSignature: (callback: any, paramsToSign: any) => {
+              callback(signature);
+            },
             uploadPreset: uploadPreset,
+            sources: ["local"],
             maxFiles: 1,
             multiple: false,
             clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
-            theme: "minimal", // 디자인에 맞게 미니멀 테마 적용
+            theme: "minimal",
           },
           (error: any, result: any) => {
             if (!error && result && result.event === "success") {
               const uploadedUrl = result.info.secure_url;
+              const uploadedPublicId = result.info.public_id;
               setImage(uploadedUrl);
+              setPublicId(uploadedPublicId);
               widget.close();
             }
             if (error) {
@@ -69,12 +73,12 @@ export default function WritePage() {
           }
         );
         widget.open();
-      } catch (err) {
-        console.error("Cloudinary Widget Initialization Failed:", err);
-        alert("업로더를 실행하는 중 오류가 발생했습니다.");
+      } else {
+        alert("이미지 업로더 스크립트를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
       }
-    } else {
-      alert("이미지 업로더 스크립트를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
+    } catch (err) {
+      console.error("Cloudinary Auth Failed:", err);
+      alert("업로드 권한을 확인하는 중 오류가 발생했습니다.");
     }
   };
 
@@ -215,6 +219,7 @@ export default function WritePage() {
               <input type="hidden" name="readTime" value={readTime} />
               <input type="hidden" name="description" value={description} />
               <input type="hidden" name="image" value={image} />
+              <input type="hidden" name="publicId" value={publicId} />
 
               <textarea
                 value={content}

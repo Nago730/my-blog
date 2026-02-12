@@ -39,6 +39,7 @@ export async function createPost(formData: FormData) {
   const readTime = formData.get("readTime") as string;
   const content = formData.get("content") as string;
   const image = formData.get("image") as string;
+  const publicId = formData.get("publicId") as string;
 
   if (!title || !content) {
     throw new Error("제목과 내용은 필수입니다.");
@@ -51,9 +52,18 @@ export async function createPost(formData: FormData) {
       category,
       readTime,
       content,
-      image,
+      // 이미지 정보를 하나로 그룹화
+      image: {
+        url: image,           // Cloudinary secure_url
+        publicId: publicId,   // 삭제/수정 시 필요한 ID
+        alt: title,           // SEO 및 접근성을 위해 제목을 기본 alt로 활용
+      },
+      // 정렬용 날짜 (문자열)
       date: new Date().toISOString().split("T")[0],
+      // 정확한 생성 시점 (Firebase 서버 시간)
       createdAt: FieldValue.serverTimestamp(),
+      // 업데이트 시점
+      updatedAt: FieldValue.serverTimestamp(),
     });
   } catch (error) {
     console.error("Error adding document: ", error);
@@ -62,4 +72,38 @@ export async function createPost(formData: FormData) {
 
   revalidatePath("/articles");
   redirect("/articles");
+}
+
+export async function deletePost(id: string) {
+  await checkAdminAuth();
+
+  try {
+    const docRef = adminDb.collection("posts").doc(id);
+    const docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      const data = docSnap.data();
+      // 새 구조 (data.image.publicId) 또는 구버전 필드 (data.publicId) 확인
+      const publicId = data?.image?.publicId || data?.publicId;
+
+      if (publicId) {
+        // publicId가 있으면 직접 사용
+        const { deleteImageById } = await import("@/lib/cloudinary");
+        await deleteImageById(publicId);
+      } else {
+        // 둘 다 없으면 URL 추출 시도 (구버전 호환용)
+        const imageUrl = data?.image?.url || data?.image;
+        if (imageUrl && typeof imageUrl === "string") {
+          const { deleteImage } = await import("@/lib/cloudinary");
+          await deleteImage(imageUrl);
+        }
+      }
+      await docRef.delete();
+    }
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    throw new Error("글 삭제 중 오류가 발생했습니다.");
+  }
+
+  revalidatePath("/articles");
 }

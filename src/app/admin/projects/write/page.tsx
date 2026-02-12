@@ -1,6 +1,7 @@
 "use client";
 
 import { createProject } from "@/app/actions/projects";
+import { getCloudinarySignature } from "@/app/actions/cloudinary";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
@@ -21,6 +22,7 @@ export default function ProjectWritePage() {
   const [link, setLink] = useState("");
   const [github, setGithub] = useState("");
   const [image, setImage] = useState("");
+  const [publicId, setPublicId] = useState("");
   const [featured, setFeatured] = useState(false);
 
   const md = useMemo(() => new MarkdownIt({
@@ -38,33 +40,40 @@ export default function ProjectWritePage() {
     setIsPending(true);
   };
 
-  const handleUpload = () => {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  const handleUpload = async () => {
+    try {
+      const signatureData = await getCloudinarySignature("signed_projects");
+      const { signature, timestamp, apiKey, cloudName, uploadPreset } = signatureData;
 
-    if (!cloudName || !uploadPreset) {
-      alert("Cloudinary 환경 변수 설정이 필요합니다.");
-      return;
-    }
-
-    if (typeof window !== 'undefined' && window.cloudinary) {
-      const widget = window.cloudinary.createUploadWidget(
-        {
-          cloudName,
-          uploadPreset,
-          maxFiles: 1,
-          multiple: false,
-          clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
-          theme: "minimal",
-        },
-        (error: any, result: any) => {
-          if (!error && result && result.event === "success") {
-            setImage(result.info.secure_url);
-            widget.close();
+      if (typeof window !== 'undefined' && window.cloudinary) {
+        const widget = window.cloudinary.createUploadWidget(
+          {
+            cloudName,
+            apiKey,
+            uploadSignatureTimestamp: timestamp,
+            uploadSignature: (callback: any, paramsToSign: any) => {
+              callback(signature);
+            },
+            uploadPreset,
+            sources: ["local"],
+            maxFiles: 1,
+            multiple: false,
+            clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
+            theme: "minimal",
+          },
+          (error: any, result: any) => {
+            if (!error && result && result.event === "success") {
+              setImage(result.info.secure_url);
+              setPublicId(result.info.public_id);
+              widget.close();
+            }
           }
-        }
-      );
-      widget.open();
+        );
+        widget.open();
+      }
+    } catch (err) {
+      console.error("Cloudinary Auth Failed:", err);
+      alert("업로드 권한 확인 중 오류가 발생했습니다.");
     }
   };
 
@@ -221,6 +230,7 @@ export default function ProjectWritePage() {
                   e.target.style.height = e.target.scrollHeight + 'px';
                 }}
               />
+              <input type="hidden" name="publicId" value={publicId} />
             </form>
           </div>
         </section>

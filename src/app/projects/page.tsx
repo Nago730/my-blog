@@ -3,6 +3,7 @@ import Link from "next/link";
 import { adminDb } from "@/lib/firebase-admin";
 
 import AdminOnly from "@/components/AdminOnly";
+import CloudinaryImage from "@/components/CloudinaryImage";
 
 export const revalidate = false;
 
@@ -56,8 +57,14 @@ export default async function ProjectsPage() {
           {projects.map((project) => (
             <Link href={`/projects/${project.id}`} key={project.id} className="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 block">
               <div className="aspect-video bg-slate-100 relative overflow-hidden">
-                {project.image ? (
-                  <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                {project.image?.url ? (
+                  <CloudinaryImage
+                    src={project.image.url}
+                    alt={project.image.alt || project.title}
+                    width={800}
+                    height={450}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 group-hover:scale-105 transition-transform duration-500" />
                 )}

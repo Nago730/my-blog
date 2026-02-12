@@ -34,6 +34,7 @@ export async function createProject(formData: FormData) {
   const link = formData.get("link") as string;
   const github = formData.get("github") as string;
   const image = formData.get("image") as string;
+  const publicId = formData.get("publicId") as string;
   const featured = formData.get("featured") === "on";
 
   if (!title || !detailContent) {
@@ -50,9 +51,15 @@ export async function createProject(formData: FormData) {
       tags,
       link,
       github,
-      image,
+      // 이미지 정보를 하나로 그룹화
+      image: {
+        url: image,
+        publicId: publicId,
+        alt: title,
+      },
       featured,
       createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
   } catch (error) {
     console.error("Error adding project: ", error);
@@ -61,4 +68,38 @@ export async function createProject(formData: FormData) {
 
   revalidatePath("/projects");
   redirect("/projects");
+}
+
+export async function deleteProject(id: string) {
+  await checkAdminAuth();
+
+  try {
+    const docRef = adminDb.collection("projects").doc(id);
+    const docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      const data = docSnap.data();
+      // 새 구조 (data.image.publicId) 또는 구버전 필드 (data.publicId) 확인
+      const publicId = data?.image?.publicId || data?.publicId;
+
+      if (publicId) {
+        // publicId가 있으면 직접 사용
+        const { deleteImageById } = await import("@/lib/cloudinary");
+        await deleteImageById(publicId);
+      } else {
+        // 둘 다 없으면 URL 추출 시도 (구버전 호환용)
+        const imageUrl = data?.image?.url || data?.image;
+        if (imageUrl && typeof imageUrl === "string") {
+          const { deleteImage } = await import("@/lib/cloudinary");
+          await deleteImage(imageUrl);
+        }
+      }
+      await docRef.delete();
+    }
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    throw new Error("프로젝트 삭제 중 오류가 발생했습니다.");
+  }
+
+  revalidatePath("/projects");
 }

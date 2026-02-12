@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
 import { adminDb } from "@/lib/firebase-admin";
+import CloudinaryImage from "@/components/CloudinaryImage";
 
 async function getPost(id: string) {
   try {
@@ -67,8 +68,15 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
 
           {/* Featured Image */}
           <div className="aspect-[21/9] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl mb-12 flex items-center justify-center text-4xl overflow-hidden relative shadow-2xl shadow-indigo-100/50">
-            {post.image ? (
-              <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+            {post.image?.url ? (
+              <CloudinaryImage
+                src={post.image.url}
+                alt={post.image.alt || post.title}
+                width={1200}
+                height={514}
+                priority
+                className="w-full h-full object-cover"
+              />
             ) : (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10" />

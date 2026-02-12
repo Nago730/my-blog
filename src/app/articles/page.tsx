@@ -3,6 +3,7 @@ import Link from "next/link";
 import { adminDb } from "@/lib/firebase-admin";
 
 import AdminOnly from "@/components/AdminOnly";
+import CloudinaryImage from "@/components/CloudinaryImage";
 
 // 시간 기반 갱신을 끄고 (false), 글 작성 시에만 온디맨드로 갱신함
 export const revalidate = false;
@@ -57,7 +58,17 @@ export default async function ArticlesPage() {
           {posts.map((post) => (
             <Link href={`/articles/${post.id}`} key={post.id} className="group cursor-pointer bg-white p-2 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1 block">
               <div className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] bg-slate-100 mb-6 transition-transform">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20" />
+                {post.image?.url ? (
+                  <CloudinaryImage
+                    src={post.image.url}
+                    alt={post.image.alt || post.title}
+                    width={600}
+                    height={375}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20" />
+                )}
                 <div className="absolute bottom-4 left-4">
                   <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-slate-900 text-xs font-bold rounded-full shadow-sm">
                     {post.category}
