@@ -73,23 +73,21 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
           </div>
 
           {/* Project Preview Image */}
-          <div className="aspect-video bg-white rounded-[2.5rem] border border-slate-200 mb-16 relative overflow-hidden shadow-2xl shadow-slate-200/50">
+          <div className="w-full bg-white rounded-[2.5rem] border border-slate-200 mb-16 relative overflow-hidden shadow-2xl shadow-slate-200/50">
             {project.image?.url ? (
               <CloudinaryImage
                 src={project.image.url}
                 alt={project.image.alt || project.title}
                 width={1200}
-                height={675}
+                height={800}
                 priority
-                className="w-full h-full object-cover"
+                className="w-full h-auto"
               />
             ) : (
-              <>
+              <div className="aspect-video w-full flex items-center justify-center text-6xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/5" />
-                <div className="absolute inset-0 flex items-center justify-center text-6xl">
-                  🚀
-                </div>
-              </>
+                🚀
+              </div>
             )}
           </div>
 

@@ -67,21 +67,21 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
           </div>
 
           {/* Featured Image */}
-          <div className="aspect-[21/9] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl mb-12 flex items-center justify-center text-4xl overflow-hidden relative shadow-2xl shadow-indigo-100/50">
+          <div className="w-full bg-slate-50 rounded-3xl mb-12 flex items-center justify-center overflow-hidden relative shadow-2xl shadow-indigo-100/50">
             {post.image?.url ? (
               <CloudinaryImage
                 src={post.image.url}
                 alt={post.image.alt || post.title}
                 width={1200}
-                height={514}
+                height={800} // This is just a hint for aspect ratio optimization, height: auto will override it visually
                 priority
-                className="w-full h-full object-cover"
+                className="w-full h-auto"
               />
             ) : (
-              <>
+              <div className="aspect-[21/9] w-full flex items-center justify-center text-4xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10" />
                 🎨
-              </>
+              </div>
             )}
           </div>
 

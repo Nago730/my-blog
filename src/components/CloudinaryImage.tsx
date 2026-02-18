@@ -26,16 +26,15 @@ function extractPublicId(url: string): string {
 }
 
 // Cloudinary loader for Next.js Image
-function cloudinaryLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
+function cloudinaryLoader({ src, quality }: { src: string; width: number; quality?: number }) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "divweajsy";
   const publicId = extractPublicId(src);
 
   // Build Cloudinary URL with transformations
+  // w_${width} 를 제거하여 원본 크기를 유지합니다.
   const params = [
-    `w_${width}`,
     `q_${quality || 'auto'}`,
     'f_auto', // automatic format selection (WebP, AVIF, etc.)
-    'c_limit', // don't upscale
   ];
 
   return `https://res.cloudinary.com/${cloudName}/image/upload/${params.join(',')}/${publicId}`;
@@ -84,10 +83,9 @@ export default function CloudinaryImage({
       height={height}
       className={className}
       priority={priority}
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      quality={85}
-      placeholder="blur"
-      blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/+Z9PQAI8AKp767S2wAAAABJRU5ErkJggg=="
+      unoptimized // 원본 크기와 품질을 그대로 유지
+      sizes="100vw"
+      quality={100}
     />
   );
 }
