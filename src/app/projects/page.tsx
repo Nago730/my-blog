@@ -11,6 +11,7 @@ async function getProjects() {
   try {
     const querySnapshot = await adminDb
       .collection("projects")
+      .where("isDeleted", "==", false)
       .orderBy("createdAt", "desc")
       .get();
 

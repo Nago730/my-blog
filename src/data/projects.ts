@@ -1,3 +1,9 @@
+export interface CloudinaryImage {
+  url: string;
+  publicId: string;
+  alt?: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -6,8 +12,14 @@ export interface Project {
   tags: string[];
   link: string;
   github?: string;
-  image?: string;
+  image?: CloudinaryImage | null;
+  images?: CloudinaryImage[];
   featured: boolean;
+  isDeleted?: boolean;
+  createdAt?: any;
+  updatedAt?: any;
+  role?: string;
+  period?: string;
 }
 
 export const mockProjects: Project[] = [

@@ -64,6 +64,7 @@ export async function createProject(formData: FormData) {
       // 구버전 호환성을 위해 첫 번째 이미지를 image 필드에도 저장
       image: images.length > 0 ? images[0] : null,
       featured,
+      isDeleted: false,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
@@ -84,35 +85,12 @@ export async function deleteProject(id: string) {
     const docSnap = await docRef.get();
 
     if (docSnap.exists) {
-      const data = docSnap.data();
-      const { deleteImageById, deleteImage } = await import("@/lib/cloudinary");
-
-      // 1. 새 구조 (images 배열) 처리
-      if (data?.images && Array.isArray(data.images)) {
-        for (const img of data.images) {
-          if (img.publicId) {
-            await deleteImageById(img.publicId);
-          } else if (img.url) {
-            await deleteImage(img.url);
-          }
-        }
-      }
-
-      // 2. 구버전 구조 (image 단일 객체) 처리
-      const oldImage = data?.image;
-      if (oldImage) {
-        const publicId = oldImage.publicId || data?.publicId;
-        if (publicId) {
-          await deleteImageById(publicId);
-        } else {
-          const imageUrl = oldImage.url || oldImage;
-          if (imageUrl && typeof imageUrl === "string") {
-            await deleteImage(imageUrl);
-          }
-        }
-      }
-
-      await docRef.delete();
+      // Soft Delete: 문서를 삭제하는 대신 상태만 변경
+      await docRef.update({
+        isDeleted: true,
+        deletedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
     }
   } catch (error) {
     console.error("Error deleting project:", error);

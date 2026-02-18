@@ -2,17 +2,17 @@ import { mockProjects } from "../../../data/projects";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 import ImageGallery from "@/components/ImageGallery";
 
 async function getProject(id: string) {
   try {
-    const docRef = doc(db, "projects", id);
-    const docSnap = await getDoc(docRef);
+    const docSnap = await adminDb.collection("projects").doc(id).get();
 
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as any;
+    if (docSnap.exists) {
+      const data = docSnap.data();
+      if (data?.isDeleted === true) return null;
+      return { id: docSnap.id, ...data } as any;
     }
 
     return mockProjects.find((p) => p.id === id);

@@ -1,3 +1,9 @@
+export interface CloudinaryImage {
+  url: string;
+  publicId: string;
+  alt?: string;
+}
+
 export interface Post {
   id: string;
   title: string;
@@ -6,7 +12,11 @@ export interface Post {
   date: string;
   category: string;
   readTime: string;
-  image?: string;
+  image?: CloudinaryImage | null;
+  images?: CloudinaryImage[];
+  isDeleted?: boolean;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 export const mockPosts: Post[] = [
@@ -27,6 +37,7 @@ export const mockPosts: Post[] = [
     date: "2026-02-11",
     category: "개발",
     readTime: "10분 읽기",
+    isDeleted: false,
   },
   {
     id: "2",
@@ -45,6 +56,7 @@ Next.js 15는 향상된 캐싱 전략과 더 정교해진 서버 컴포넌트 �
     date: "2026-02-10",
     category: "디자인",
     readTime: "8분 읽기",
+    isDeleted: false,
   },
   {
     id: "3",
@@ -61,6 +73,7 @@ Next.js 15는 향상된 캐싱 전략과 더 정교해진 서버 컴포넌트 �
     date: "2026-02-09",
     category: "디자인",
     readTime: "12분 읽기",
+    isDeleted: false,
   },
   {
     id: "4",
@@ -77,6 +90,7 @@ Next.js 15는 향상된 캐싱 전략과 더 정교해진 서버 컴포넌트 �
     date: "2026-02-08",
     category: "개발",
     readTime: "15분 읽기",
+    isDeleted: false,
   },
   {
     id: "5",
@@ -93,6 +107,7 @@ Next.js 15는 향상된 캐싱 전략과 더 정교해진 서버 컴포넌트 �
     date: "2026-02-07",
     category: "커리어",
     readTime: "7분 읽기",
+    isDeleted: false,
   },
 ];
 

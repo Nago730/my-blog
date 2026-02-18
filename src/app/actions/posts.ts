@@ -66,6 +66,8 @@ export async function createPost(formData: FormData) {
       image: images.length > 0 ? images[0] : null,
       // 정렬용 날짜 (문자열)
       date: new Date().toISOString().split("T")[0],
+      // 삭제 여부 플래그
+      isDeleted: false,
       // 정확한 생성 시점 (Firebase 서버 시간)
       createdAt: FieldValue.serverTimestamp(),
       // 업데이트 시점
