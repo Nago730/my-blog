@@ -14,6 +14,17 @@ export default function Footer() {
         <p className="text-slate-500 text-sm mb-8">
           &copy; 2026 Jun's Blog. 고민하고 기록하며 함께 성장하는 공간입니다.
         </p>
+
+        {/* Navigation Links */}
+        <div className="flex justify-center space-x-10 mb-10">
+          <Link href="/articles" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
+            글 목록
+          </Link>
+          <Link href="/projects" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
+            프로젝트
+          </Link>
+        </div>
+
         <div className="flex justify-center space-x-6 text-slate-400">
           <a href="#" className="hover:text-slate-600 transition-colors font-medium">Twitter</a>
           <a href="#" className="hover:text-slate-600 transition-colors font-medium">GitHub</a>
