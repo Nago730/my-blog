@@ -5,6 +5,8 @@ import { adminDb } from "@/lib/firebase-admin";
 import AdminOnly from "@/components/AdminOnly";
 import CloudinaryImage from "@/components/CloudinaryImage";
 
+import DeletePostButton from "@/components/DeletePostButton";
+
 // 시간 기반 갱신을 끄고 (false), 글 작성 시에만 온디맨드로 갱신함
 export const revalidate = false;
 
@@ -56,7 +58,7 @@ export default async function ArticlesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => (
-            <Link href={`/articles/${post.id}`} key={post.id} className="group cursor-pointer bg-white p-2 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1 block">
+            <Link href={`/articles/${post.id}`} key={post.id} className="group cursor-pointer bg-white p-2 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1 block relative">
               <div className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] bg-slate-100 mb-6 transition-transform">
                 {post.image?.url ? (
                   <CloudinaryImage
@@ -74,7 +76,15 @@ export default async function ArticlesPage() {
                     {post.category}
                   </span>
                 </div>
+
+                {/* 관리자용 삭제 버튼: 호버 시에만 표시 */}
+                <AdminOnly>
+                  <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DeletePostButton id={post.id} title={post.title} />
+                  </div>
+                </AdminOnly>
               </div>
+
               <div className="px-4 pb-6">
                 <div className="flex items-center space-x-2 text-slate-500 text-xs font-medium mb-3">
                   <span>{post.date}</span>

@@ -4,6 +4,8 @@ import Link from "next/link";
 import MarkdownIt from "markdown-it";
 import { adminDb } from "@/lib/firebase-admin";
 import ImageGallery from "@/components/ImageGallery";
+import AdminOnly from "@/components/AdminOnly";
+import DeletePostButton from "@/components/DeletePostButton";
 
 async function getPost(id: string) {
   try {
@@ -48,9 +50,14 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
         <article className="max-w-3xl mx-auto px-4">
           {/* Metadata */}
           <div className="mb-8">
-            <Link href="/articles" className="text-indigo-600 font-semibold text-sm hover:underline mb-8 inline-block">
-              ← 모든 글 목록으로 돌아가기
-            </Link>
+            <div className="flex items-center justify-between mb-8">
+              <Link href="/articles" className="text-indigo-600 font-semibold text-sm hover:underline">
+                ← 모든 글 목록으로 돌아가기
+              </Link>
+              <AdminOnly>
+                <DeletePostButton id={post.id} title={post.title} redirectToList={true} />
+              </AdminOnly>
+            </div>
             <div className="flex items-center space-x-2 text-slate-500 text-sm mb-4">
               <span className="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded-full text-xs">
                 {post.category}
@@ -67,6 +74,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
               {post.description}
             </p>
           </div>
+
 
           {/* New Interactive Gallery */}
           <div className="mb-16">
