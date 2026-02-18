@@ -33,9 +33,17 @@ export async function createProject(formData: FormData) {
   const tagsStr = formData.get("tags") as string;
   const link = formData.get("link") as string;
   const github = formData.get("github") as string;
-  const image = formData.get("image") as string;
-  const publicId = formData.get("publicId") as string;
   const featured = formData.get("featured") === "on";
+
+  // 다중 이미지 처리
+  const imageUrls = formData.getAll("images[]") as string[];
+  const publicIds = formData.getAll("publicIds[]") as string[];
+
+  const images = imageUrls.map((url, index) => ({
+    url,
+    publicId: publicIds[index] || "",
+    alt: title,
+  }));
 
   if (!title || !detailContent) {
     throw new Error("제목과 상세 내용은 필수입니다.");
@@ -51,12 +59,10 @@ export async function createProject(formData: FormData) {
       tags,
       link,
       github,
-      // 이미지 정보를 하나로 그룹화
-      image: {
-        url: image,
-        publicId: publicId,
-        alt: title,
-      },
+      // 다중 이미지 배열 저장
+      images,
+      // 구버전 호환성을 위해 첫 번째 이미지를 image 필드에도 저장
+      image: images.length > 0 ? images[0] : null,
       featured,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
@@ -79,21 +85,33 @@ export async function deleteProject(id: string) {
 
     if (docSnap.exists) {
       const data = docSnap.data();
-      // 새 구조 (data.image.publicId) 또는 구버전 필드 (data.publicId) 확인
-      const publicId = data?.image?.publicId || data?.publicId;
+      const { deleteImageById, deleteImage } = await import("@/lib/cloudinary");
 
-      if (publicId) {
-        // publicId가 있으면 직접 사용
-        const { deleteImageById } = await import("@/lib/cloudinary");
-        await deleteImageById(publicId);
-      } else {
-        // 둘 다 없으면 URL 추출 시도 (구버전 호환용)
-        const imageUrl = data?.image?.url || data?.image;
-        if (imageUrl && typeof imageUrl === "string") {
-          const { deleteImage } = await import("@/lib/cloudinary");
-          await deleteImage(imageUrl);
+      // 1. 새 구조 (images 배열) 처리
+      if (data?.images && Array.isArray(data.images)) {
+        for (const img of data.images) {
+          if (img.publicId) {
+            await deleteImageById(img.publicId);
+          } else if (img.url) {
+            await deleteImage(img.url);
+          }
         }
       }
+
+      // 2. 구버전 구조 (image 단일 객체) 처리
+      const oldImage = data?.image;
+      if (oldImage) {
+        const publicId = oldImage.publicId || data?.publicId;
+        if (publicId) {
+          await deleteImageById(publicId);
+        } else {
+          const imageUrl = oldImage.url || oldImage;
+          if (imageUrl && typeof imageUrl === "string") {
+            await deleteImage(imageUrl);
+          }
+        }
+      }
+
       await docRef.delete();
     }
   } catch (error) {

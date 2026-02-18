@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import MarkdownIt from "markdown-it";
 import { adminDb } from "@/lib/firebase-admin";
-import CloudinaryImage from "@/components/CloudinaryImage";
+import ImageGallery from "@/components/ImageGallery";
 
 async function getPost(id: string) {
   try {
@@ -39,6 +39,8 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
   const cleanContent = typeof post.content === 'string' ? post.content.trim() : '';
   const htmlContent = md.render(cleanContent);
 
+  const images = post.images || (post.image?.url ? [post.image] : []);
+
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100">
 
@@ -66,23 +68,9 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
             </p>
           </div>
 
-          {/* Featured Image */}
-          <div className="w-full bg-slate-50 rounded-3xl mb-12 flex items-center justify-center overflow-hidden relative shadow-2xl shadow-indigo-100/50">
-            {post.image?.url ? (
-              <CloudinaryImage
-                src={post.image.url}
-                alt={post.image.alt || post.title}
-                width={1200}
-                height={800} // This is just a hint for aspect ratio optimization, height: auto will override it visually
-                priority
-                className="w-full h-auto"
-              />
-            ) : (
-              <div className="aspect-[21/9] w-full flex items-center justify-center text-4xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10" />
-                🎨
-              </div>
-            )}
+          {/* New Interactive Gallery */}
+          <div className="mb-16">
+            <ImageGallery images={images} title={post.title} />
           </div>
 
           {/* Content */}

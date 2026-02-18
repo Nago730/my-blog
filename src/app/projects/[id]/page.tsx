@@ -4,7 +4,7 @@ import Link from "next/link";
 import MarkdownIt from "markdown-it";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import CloudinaryImage from "@/components/CloudinaryImage";
+import ImageGallery from "@/components/ImageGallery";
 
 async function getProject(id: string) {
   try {
@@ -39,6 +39,8 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
   const cleanContent = typeof project.detailContent === 'string' ? project.detailContent.trim() : '';
   const htmlContent = md.render(cleanContent);
 
+  const images = project.images || (project.image?.url ? [project.image] : []);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100">
 
@@ -72,23 +74,9 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
             </p>
           </div>
 
-          {/* Project Preview Image */}
-          <div className="w-full bg-white rounded-[2.5rem] border border-slate-200 mb-16 relative overflow-hidden shadow-2xl shadow-slate-200/50">
-            {project.image?.url ? (
-              <CloudinaryImage
-                src={project.image.url}
-                alt={project.image.alt || project.title}
-                width={1200}
-                height={800}
-                priority
-                className="w-full h-auto"
-              />
-            ) : (
-              <div className="aspect-video w-full flex items-center justify-center text-6xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-violet-500/5" />
-                🚀
-              </div>
-            )}
+          {/* New Interactive Gallery */}
+          <div className="mb-16">
+            <ImageGallery images={images} title={project.title} />
           </div>
 
           {/* Content Grid */}

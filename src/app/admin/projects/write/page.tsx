@@ -21,8 +21,7 @@ export default function ProjectWritePage() {
   const [tags, setTags] = useState("");
   const [link, setLink] = useState("");
   const [github, setGithub] = useState("");
-  const [image, setImage] = useState("");
-  const [publicId, setPublicId] = useState("");
+  const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
   const [featured, setFeatured] = useState(false);
 
   const md = useMemo(() => new MarkdownIt({
@@ -56,16 +55,16 @@ export default function ProjectWritePage() {
             },
             uploadPreset,
             sources: ["local"],
-            maxFiles: 1,
-            multiple: false,
+            maxFiles: 10,
+            multiple: true,
             clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
             theme: "minimal",
           },
           (error: any, result: any) => {
             if (!error && result && result.event === "success") {
-              setImage(result.info.secure_url);
-              setPublicId(result.info.public_id);
-              widget.close();
+              const uploadedUrl = result.info.secure_url;
+              const uploadedPublicId = result.info.public_id;
+              setImages(prev => [...prev, { url: uploadedUrl, publicId: uploadedPublicId }]);
             }
           }
         );
@@ -190,24 +189,38 @@ export default function ProjectWritePage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block">IMAGE URL</label>
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    placeholder="이미지 주소 직접 입력 또는 업로드"
-                    className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                    name="image"
-                    form="project-form"
-                  />
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block">IMAGES</label>
+                <div className="space-y-4">
                   <button
                     type="button"
                     onClick={handleUpload}
-                    className="px-4 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all flex items-center gap-2 shrink-0 group"
+                    className="w-full px-4 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 group"
                   >
-                    <span>파일 업로드</span>
+                    <span>이미지 업로드 (최대 10장)</span>
                   </button>
+
+                  {images.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {images.map((img, index) => (
+                        <div key={index} className="relative aspect-video rounded-xl overflow-hidden border border-slate-100 bg-slate-50 group shadow-sm flex items-center justify-center">
+                          <img src={img.url} alt={`Uploaded ${index}`} className="max-w-full max-h-full object-contain" />
+                          <button
+                            type="button"
+                            onClick={() => setImages(prev => prev.filter((_, i) => i !== index))}
+                            className="absolute top-2 right-2 bg-white/90 hover:bg-white text-slate-900 rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0"
+                            title="삭제"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                          {index === 0 && (
+                            <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-indigo-600 text-white text-[8px] font-black rounded-md uppercase tracking-tighter">Cover</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -230,7 +243,12 @@ export default function ProjectWritePage() {
                   e.target.style.height = e.target.scrollHeight + 'px';
                 }}
               />
-              <input type="hidden" name="publicId" value={publicId} />
+              {images.map((img, idx) => (
+                <div key={idx}>
+                  <input type="hidden" name="images[]" value={img.url} />
+                  <input type="hidden" name="publicIds[]" value={img.publicId} />
+                </div>
+              ))}
             </form>
           </div>
         </section>
@@ -253,9 +271,20 @@ export default function ProjectWritePage() {
               {description || "짧은 요약 설명이 여기에 표시됩니다."}
             </p>
 
-            {image && (
-              <div className="aspect-[16/9] w-full rounded-2xl overflow-hidden mb-12 shadow-2xl">
-                <img src={image} alt="Preview" className="w-full h-full object-cover" />
+            {images.length > 0 && (
+              <div className="w-full mb-12 space-y-4">
+                <div className="aspect-[16/9] w-full rounded-2xl overflow-hidden shadow-2xl">
+                  <img src={images[0].url} alt="Cover Preview" className="w-full h-full object-cover" />
+                </div>
+                {images.length > 1 && (
+                  <div className="grid grid-cols-4 gap-4">
+                    {images.slice(1).map((img, i) => (
+                      <div key={i} className="aspect-square rounded-xl overflow-hidden shadow-md">
+                        <img src={img.url} alt={`Gallery item ${i}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

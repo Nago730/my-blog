@@ -38,8 +38,16 @@ export async function createPost(formData: FormData) {
   const category = formData.get("category") as string;
   const readTime = formData.get("readTime") as string;
   const content = formData.get("content") as string;
-  const image = formData.get("image") as string;
-  const publicId = formData.get("publicId") as string;
+
+  // 다중 이미지 처리
+  const imageUrls = formData.getAll("images[]") as string[];
+  const publicIds = formData.getAll("publicIds[]") as string[];
+
+  const images = imageUrls.map((url, index) => ({
+    url,
+    publicId: publicIds[index] || "",
+    alt: title,
+  }));
 
   if (!title || !content) {
     throw new Error("제목과 내용은 필수입니다.");
@@ -52,12 +60,10 @@ export async function createPost(formData: FormData) {
       category,
       readTime,
       content,
-      // 이미지 정보를 하나로 그룹화
-      image: {
-        url: image,           // Cloudinary secure_url
-        publicId: publicId,   // 삭제/수정 시 필요한 ID
-        alt: title,           // SEO 및 접근성을 위해 제목을 기본 alt로 활용
-      },
+      // 다중 이미지 배열 저장
+      images,
+      // 구버전 호환성을 위해 첫 번째 이미지를 image 필드에도 저장 (선택 사항이나 권장)
+      image: images.length > 0 ? images[0] : null,
       // 정렬용 날짜 (문자열)
       date: new Date().toISOString().split("T")[0],
       // 정확한 생성 시점 (Firebase 서버 시간)
@@ -83,21 +89,34 @@ export async function deletePost(id: string) {
 
     if (docSnap.exists) {
       const data = docSnap.data();
-      // 새 구조 (data.image.publicId) 또는 구버전 필드 (data.publicId) 확인
-      const publicId = data?.image?.publicId || data?.publicId;
+      const { deleteImageById, deleteImage } = await import("@/lib/cloudinary");
 
-      if (publicId) {
-        // publicId가 있으면 직접 사용
-        const { deleteImageById } = await import("@/lib/cloudinary");
-        await deleteImageById(publicId);
-      } else {
-        // 둘 다 없으면 URL 추출 시도 (구버전 호환용)
-        const imageUrl = data?.image?.url || data?.image;
-        if (imageUrl && typeof imageUrl === "string") {
-          const { deleteImage } = await import("@/lib/cloudinary");
-          await deleteImage(imageUrl);
+      // 1. 새 구조 (images 배열) 처리
+      if (data?.images && Array.isArray(data.images)) {
+        for (const img of data.images) {
+          if (img.publicId) {
+            await deleteImageById(img.publicId);
+          } else if (img.url) {
+            await deleteImage(img.url);
+          }
         }
       }
+
+      // 2. 구버전 구조 (image 단일 객체) 처리
+      // 만약 images 배열에 포함되지 않은 별도의 image 필드가 있다면 삭제
+      const oldImage = data?.image;
+      if (oldImage) {
+        const publicId = oldImage.publicId || data?.publicId;
+        if (publicId) {
+          await deleteImageById(publicId);
+        } else {
+          const imageUrl = oldImage.url || oldImage;
+          if (imageUrl && typeof imageUrl === "string") {
+            await deleteImage(imageUrl);
+          }
+        }
+      }
+
       await docRef.delete();
     }
   } catch (error) {
