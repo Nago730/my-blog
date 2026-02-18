@@ -91,23 +91,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
 
-          {/* Footer of the article */}
-          <div className="mt-20 pt-10 border-t border-slate-100">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-xl">
-                  👨‍💻
-                </div>
-                <div>
-                  <p className="font-bold">Nago730</p>
-                  <p className="text-sm text-slate-500">끊임없이 탐구하는 개발자</p>
-                </div>
-              </div>
-              <button className="px-6 py-2 bg-indigo-600 text-white rounded-full font-bold text-sm hover:bg-indigo-700 transition-all">
-                글 공유하기
-              </button>
-            </div>
-          </div>
+
         </article>
       </main>
 
