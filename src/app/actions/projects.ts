@@ -61,8 +61,6 @@ export async function createProject(formData: FormData) {
       github,
       // 다중 이미지 배열 저장
       images,
-      // 구버전 호환성을 위해 첫 번째 이미지를 image 필드에도 저장
-      image: images.length > 0 ? images[0] : null,
       featured,
       isDeleted: false,
       createdAt: FieldValue.serverTimestamp(),

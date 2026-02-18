@@ -61,10 +61,10 @@ export default async function ArticlesPage() {
           {posts.map((post) => (
             <Link href={`/articles/${post.id}`} key={post.id} className="group cursor-pointer bg-white p-2 rounded-[2rem] border border-slate-200 hover:shadow-xl transition-all hover:-translate-y-1 block relative">
               <div className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] bg-slate-100 mb-6 transition-transform">
-                {post.image?.url ? (
+                {post.images && post.images.length > 0 ? (
                   <CloudinaryImage
-                    src={post.image.url}
-                    alt={post.image.alt || post.title}
+                    src={post.images[0].url}
+                    alt={post.images[0].alt || post.title}
                     width={600}
                     height={375}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

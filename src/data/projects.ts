@@ -12,7 +12,6 @@ export interface Project {
   tags: string[];
   link: string;
   github?: string;
-  image?: CloudinaryImage | null;
   images?: CloudinaryImage[];
   featured: boolean;
   isDeleted?: boolean;

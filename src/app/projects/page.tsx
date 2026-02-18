@@ -58,10 +58,10 @@ export default async function ProjectsPage() {
           {projects.map((project) => (
             <Link href={`/projects/${project.id}`} key={project.id} className="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 block">
               <div className="aspect-video bg-slate-100 relative overflow-hidden">
-                {project.image?.url ? (
+                {project.images && project.images.length > 0 ? (
                   <CloudinaryImage
-                    src={project.image.url}
-                    alt={project.image.alt || project.title}
+                    src={project.images[0].url}
+                    alt={project.images[0].alt || project.title}
                     width={800}
                     height={450}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

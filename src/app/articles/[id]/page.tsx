@@ -45,7 +45,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
   const cleanContent = typeof post.content === 'string' ? post.content.trim() : '';
   const htmlContent = md.render(cleanContent);
 
-  const images = post.images || (post.image?.url ? [post.image] : []);
+  const images = post.images || [];
 
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100">

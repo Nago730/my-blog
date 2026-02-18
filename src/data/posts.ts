@@ -12,7 +12,6 @@ export interface Post {
   date: string;
   category: string;
   readTime: string;
-  image?: CloudinaryImage | null;
   images?: CloudinaryImage[];
   isDeleted?: boolean;
   createdAt?: any;
