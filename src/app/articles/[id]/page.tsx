@@ -12,7 +12,11 @@ async function getPost(id: string) {
     const docSnap = await adminDb.collection("posts").doc(id).get();
 
     if (docSnap.exists) {
-      return { id: docSnap.id, ...docSnap.data() } as any;
+      const data = docSnap.data();
+      // Soft Delete된 문서라면 null 반환 (상세 페이지에서 notFound 트리거)
+      if (data?.isDeleted === true) return null;
+
+      return { id: docSnap.id, ...data } as any;
     }
 
     return mockPosts.find((p) => p.id === id);

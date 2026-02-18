@@ -88,36 +88,14 @@ export async function deletePost(id: string) {
     const docSnap = await docRef.get();
 
     if (docSnap.exists) {
-      const data = docSnap.data();
-      const { deleteImageById, deleteImage } = await import("@/lib/cloudinary");
+      // Soft Delete: 문서를 삭제하는 대신 상태만 변경
+      await docRef.update({
+        isDeleted: true,
+        deletedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
 
-      // 1. 새 구조 (images 배열) 처리
-      if (data?.images && Array.isArray(data.images)) {
-        for (const img of data.images) {
-          if (img.publicId) {
-            await deleteImageById(img.publicId);
-          } else if (img.url) {
-            await deleteImage(img.url);
-          }
-        }
-      }
-
-      // 2. 구버전 구조 (image 단일 객체) 처리
-      // 만약 images 배열에 포함되지 않은 별도의 image 필드가 있다면 삭제
-      const oldImage = data?.image;
-      if (oldImage) {
-        const publicId = oldImage.publicId || data?.publicId;
-        if (publicId) {
-          await deleteImageById(publicId);
-        } else {
-          const imageUrl = oldImage.url || oldImage;
-          if (imageUrl && typeof imageUrl === "string") {
-            await deleteImage(imageUrl);
-          }
-        }
-      }
-
-      await docRef.delete();
+      // 이미지는 삭제하지 않고 유지합니다 (Soft Delete의 목적)
     }
   } catch (error) {
     console.error("Error deleting post:", error);

@@ -15,6 +15,8 @@ async function getPosts() {
   try {
     const querySnapshot = await adminDb
       .collection("posts")
+      .where("isDeleted", "!=", true) // 삭제되지 않은 문서만 가져옴
+      .orderBy("isDeleted") // != 쿼리 사용 시 해당 필드가 첫 번째 정렬 기준이 되어야 함
       .orderBy("createdAt", "desc")
       .get();
 
