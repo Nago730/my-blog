@@ -7,12 +7,10 @@ import { useRouter } from "next/navigation";
 interface DeletePostButtonProps {
   id: string;
   title?: string;
-  redirectToList?: boolean;
 }
 
-export default function DeletePostButton({ id, title, redirectToList = false }: DeletePostButtonProps) {
+export default function DeletePostButton({ id, title }: DeletePostButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,13 +25,15 @@ export default function DeletePostButton({ id, title, redirectToList = false }: 
     setIsDeleting(true);
     try {
       await deletePost(id);
-      if (redirectToList) {
-        router.push("/articles");
-      }
+      // 서버 액션(deletePost) 내부에서 redirect("/articles")를 호출하므로
+      // 성공 시 이 이후 코드는 실행되지 않고 페이지 이동이 일어납니다.
     } catch (error) {
+      // 넥스트 리다이렉트 에러는 에러 처리에서 제외
+      if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+        return;
+      }
       console.error(error);
       alert("삭제 중 오류가 발생했습니다.");
-    } finally {
       setIsDeleting(false);
     }
   };

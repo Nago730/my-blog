@@ -55,7 +55,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
                 ← 모든 글 목록으로 돌아가기
               </Link>
               <AdminOnly>
-                <DeletePostButton id={post.id} title={post.title} redirectToList={true} />
+                <DeletePostButton id={post.id} title={post.title} />
               </AdminOnly>
             </div>
             <div className="flex items-center space-x-2 text-slate-500 text-sm mb-4">

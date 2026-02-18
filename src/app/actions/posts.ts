@@ -125,4 +125,5 @@ export async function deletePost(id: string) {
   }
 
   revalidatePath("/articles");
+  redirect("/articles");
 }
