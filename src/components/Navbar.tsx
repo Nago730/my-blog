@@ -29,10 +29,8 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
-            <Link href="/" className="hover:text-indigo-600 transition-colors">홈</Link>
             <Link href="/articles" className="hover:text-indigo-600 transition-colors">글 목록</Link>
             <Link href="/projects" className="hover:text-indigo-600 transition-colors">프로젝트</Link>
-            <Link href="/about" className="hover:text-indigo-600 transition-colors">소개</Link>
           </div>
 
           <div className="flex items-center space-x-4 min-w-[80px] justify-end relative">

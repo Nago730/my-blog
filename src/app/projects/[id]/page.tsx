@@ -118,22 +118,10 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
                 </div>
               </div>
 
-              <div className="bg-indigo-50 p-8 rounded-[2rem] border border-indigo-100">
-                <h3 className="text-sm font-bold text-indigo-900 mb-4">함께 이야기하기</h3>
-                <p className="text-sm text-indigo-700 leading-relaxed mb-6">이 프로젝트에 대해 궁금한 점이 있거나 피드백을 주고 싶으시면 언제든 연락주세요!</p>
-                <Link href="/about" className="text-indigo-600 font-bold text-xs hover:underline">성장하는 개발자 정보 보기 →</Link>
-              </div>
             </div>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="py-20 border-t border-slate-200 bg-white mt-auto text-center">
-        <p className="text-slate-400 text-sm italic">
-          끊임없이 도전하고 혁신하는 결과물을 만듭니다.
-        </p>
-      </footer>
     </div>
   );
 }
