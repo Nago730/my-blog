@@ -3,7 +3,7 @@
 import { adminDb, adminAuth } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { cookies } from "next/headers";
 
 // 서버 전용 환경변수 (보안을 위해 NEXT_PUBLIC 제거 버전 사용)
@@ -81,7 +81,7 @@ export async function createPost(formData: FormData) {
   }
 
   revalidatePath("/articles");
-  redirect("/articles");
+  redirect("/articles", RedirectType.replace);
 }
 
 export async function deletePost(id: string) {
@@ -112,7 +112,7 @@ export async function deletePost(id: string) {
   }
 
   revalidatePath("/articles");
-  redirect("/articles");
+  redirect("/articles", RedirectType.replace);
 }
 
 export async function updatePost(id: string, formData: FormData) {
@@ -158,5 +158,5 @@ export async function updatePost(id: string, formData: FormData) {
 
   revalidatePath("/articles");
   revalidatePath(`/articles/${slug}`);
-  redirect(`/articles/${slug}`);
+  redirect(`/articles/${slug}`, RedirectType.replace);
 }
