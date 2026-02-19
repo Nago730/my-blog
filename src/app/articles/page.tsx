@@ -6,6 +6,15 @@ import AdminOnly from "@/components/AdminOnly";
 import CloudinaryImage from "@/components/CloudinaryImage";
 
 import DeletePostButton from "@/components/DeletePostButton";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "아티클 목록",
+  description: "최신 기술 동향과 개발 팁을 담은 아티클 목록입니다.",
+  alternates: {
+    canonical: `/articles`,
+  },
+};
 
 // 1시간마다 혹은 수정 시 갱시 (ISR)
 export const revalidate = 3600;

@@ -1,0 +1,41 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Gradient -->
+  <rect width="1200" height="630" fill="url(#paint0_linear)"/>
+  
+  <!-- Subtle Abstract Ornaments -->
+  <circle cx="1100" cy="100" r="200" fill="white" fill-opacity="0.05"/>
+  <circle cx="100" cy="530" r="150" fill="white" fill-opacity="0.03"/>
+  
+  <!-- Geometric accents -->
+  <path d="M0 630L1200 630L1200 580L0 610V630Z" fill="white" fill-opacity="0.05"/>
+  
+  <!-- Content Container -->
+  <g filter="url(#filter0_d)">
+    <text fill="white" xml:space="preserve" style="white-space: pre" font-family="Inter, system-ui, sans-serif" font-size="120" font-weight="900" letter-spacing="-0.04em"><tspan x="120" y="320">Just-Jun</tspan></text>
+    <text fill="rgba(255,255,255,0.7)" xml:space="preserve" style="white-space: pre" font-family="Inter, system-ui, sans-serif" font-size="40" font-weight="500" letter-spacing="0.2em"><tspan x="125" y="385">TECH & LIFE LOG</tspan></text>
+  </g>
+
+  <!-- Bottom Accent Line -->
+  <rect x="120" y="420" width="80" height="8" rx="4" fill="#6366F1"/>
+
+  <defs>
+    <!-- Filter for subtle text shadow -->
+    <filter id="filter0_d" x="110" y="200" width="600" height="300" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="10"/>
+      <feGaussianBlur stdDeviation="10"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+
+    <!-- Main Background Gradient -->
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.5" stop-color="#1E1B4B"/>
+      <stop offset="1" stop-color="#4338CA"/>
+    </linearGradient>
+  </defs>
+</svg>

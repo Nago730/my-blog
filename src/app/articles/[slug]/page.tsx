@@ -6,9 +6,36 @@ import { adminDb } from "@/lib/firebase-admin";
 import ImageGallery from "@/components/ImageGallery";
 import AdminOnly from "@/components/AdminOnly";
 import DeletePostButton from "@/components/DeletePostButton";
+import { Metadata } from "next";
 
 // 1시간마다 혹은 수정 시 갱신 (ISR)
 export const revalidate = 3600;
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPost(slug);
+
+  if (!post) return { title: "Post Not Found" };
+
+  return {
+    title: post.title,
+    description: post.description,
+    alternates: {
+      canonical: `/articles/${slug}`,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      images: [post.ogImage || (post.images?.[0]?.url) || "/default-og.svg"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images: [post.ogImage || (post.images?.[0]?.url) || "/default-og.svg"],
+    },
+  };
+}
 
 // 빌드 시점에 정적 페이지 미리 생성 (SSG)
 export async function generateStaticParams() {
