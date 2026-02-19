@@ -79,7 +79,15 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
                 ← 모든 글 목록으로 돌아가기
               </Link>
               <AdminOnly>
-                <DeletePostButton id={post.id} title={post.title} />
+                <div className="flex items-center space-x-2">
+                  <Link
+                    href={`/admin/edit/${post.id}`}
+                    className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200 transition-all flex items-center space-x-1"
+                  >
+                    <span>✏️ 수정</span>
+                  </Link>
+                  <DeletePostButton id={post.id} title={post.title} />
+                </div>
               </AdminOnly>
             </div>
             <div className="flex items-center space-x-2 text-slate-500 text-sm mb-4">

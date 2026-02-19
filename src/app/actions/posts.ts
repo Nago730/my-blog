@@ -105,3 +105,45 @@ export async function deletePost(id: string) {
   revalidatePath("/articles");
   redirect("/articles");
 }
+
+export async function updatePost(id: string, formData: FormData) {
+  await checkAdminAuth();
+
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const category = formData.get("category") as string;
+  const readTime = formData.get("readTime") as string;
+  const content = formData.get("content") as string;
+
+  const imageUrls = formData.getAll("images[]") as string[];
+  const publicIds = formData.getAll("publicIds[]") as string[];
+
+  const images = imageUrls.map((url, index) => ({
+    url,
+    publicId: publicIds[index] || "",
+    alt: title,
+  }));
+
+  if (!title || !content) {
+    throw new Error("제목과 내용은 필수입니다.");
+  }
+
+  try {
+    await adminDb.collection("posts").doc(id).update({
+      title,
+      description,
+      category,
+      readTime,
+      content,
+      images,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error updating document: ", error);
+    throw new Error("글 수정 중 오류가 발생했습니다.");
+  }
+
+  revalidatePath("/articles");
+  revalidatePath(`/articles/${id}`);
+  redirect(`/articles/${id}`);
+}
