@@ -35,6 +35,8 @@ export async function createPost(formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const slug = formData.get("slug") as string;
+  const ogImage = formData.get("ogImage") as string;
   const category = formData.get("category") as string;
   const readTime = formData.get("readTime") as string;
   const content = formData.get("content") as string;
@@ -49,14 +51,16 @@ export async function createPost(formData: FormData) {
     alt: title,
   }));
 
-  if (!title || !content) {
-    throw new Error("제목과 내용은 필수입니다.");
+  if (!title || !content || !slug) {
+    throw new Error("제목, 내용, 슬러그는 필수입니다.");
   }
 
   try {
     await adminDb.collection("posts").add({
       title,
       description,
+      slug,
+      ogImage: ogImage || (images.length > 0 ? images[0].url : ""),
       category,
       readTime,
       content,
@@ -111,6 +115,8 @@ export async function updatePost(id: string, formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
+  const slug = formData.get("slug") as string;
+  const ogImage = formData.get("ogImage") as string;
   const category = formData.get("category") as string;
   const readTime = formData.get("readTime") as string;
   const content = formData.get("content") as string;
@@ -124,14 +130,16 @@ export async function updatePost(id: string, formData: FormData) {
     alt: title,
   }));
 
-  if (!title || !content) {
-    throw new Error("제목과 내용은 필수입니다.");
+  if (!title || !content || !slug) {
+    throw new Error("제목, 내용, 슬러그는 필수입니다.");
   }
 
   try {
     await adminDb.collection("posts").doc(id).update({
       title,
       description,
+      slug,
+      ogImage: ogImage || (images.length > 0 ? images[0].url : ""),
       category,
       readTime,
       content,

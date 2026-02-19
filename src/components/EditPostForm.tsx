@@ -17,6 +17,8 @@ interface EditPostFormProps {
   post: {
     id: string;
     title: string;
+    slug?: string;
+    ogImage?: string;
     content: string;
     description: string;
     category: string;
@@ -28,8 +30,10 @@ interface EditPostFormProps {
 export default function EditPostForm({ post }: EditPostFormProps) {
   const [isPending, setIsPending] = useState(false);
   const [title, setTitle] = useState(post.title);
+  const [slug, setSlug] = useState(post.slug || "");
   const [content, setContent] = useState(post.content);
   const [description, setDescription] = useState(post.description);
+  const [ogImage, setOgImage] = useState(post.ogImage || "");
   const [category, setCategory] = useState(post.category);
   const [readTime, setReadTime] = useState(post.readTime);
   const [images, setImages] = useState<{ url: string; publicId: string }[]>(post.images || []);
@@ -147,6 +151,19 @@ export default function EditPostForm({ post }: EditPostFormProps) {
             <div className="space-y-6 shrink-0">
               <div className="grid grid-cols-2 gap-6">
                 <div>
+                  <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">SLUG (URL)</label>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    placeholder="nextjs-seo-guide"
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                    name="slug"
+                    form="edit-form"
+                    required
+                  />
+                </div>
+                <div>
                   <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">CATEGORY</label>
                   <select
                     value={category}
@@ -161,6 +178,22 @@ export default function EditPostForm({ post }: EditPostFormProps) {
                     <option value="일상">일상</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">DESCRIPTION (SEO)</label>
+                  <input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="검색 결과 요약 (150자 내외)"
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                    name="description"
+                    form="edit-form"
+                    required
+                  />
+                </div>
                 <div>
                   <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">READ TIME</label>
                   <input
@@ -174,15 +207,16 @@ export default function EditPostForm({ post }: EditPostFormProps) {
                   />
                 </div>
               </div>
+
               <div>
-                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">DESCRIPTION</label>
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">OG IMAGE URL (OPTIONAL)</label>
                 <input
                   type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="짧은 요약을 입력하세요"
+                  value={ogImage}
+                  onChange={(e) => setOgImage(e.target.value)}
+                  placeholder="미입력 시 첫 번째 업로드 이미지 사용"
                   className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                  name="description"
+                  name="ogImage"
                   form="edit-form"
                 />
               </div>
@@ -228,6 +262,8 @@ export default function EditPostForm({ post }: EditPostFormProps) {
 
             <form id="edit-form" action={updatePostWithId} onSubmit={handleSubmit} className="flex flex-col">
               <input type="hidden" name="title" value={title} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="ogImage" value={ogImage} />
               <input type="hidden" name="category" value={category} />
               <input type="hidden" name="readTime" value={readTime} />
               <input type="hidden" name="description" value={description} />

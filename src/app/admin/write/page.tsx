@@ -16,8 +16,10 @@ declare global {
 export default function WritePage() {
   const [isPending, setIsPending] = useState(false);
   const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
+  const [ogImage, setOgImage] = useState("");
   const [category, setCategory] = useState("개발");
   const [readTime, setReadTime] = useState("");
   const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
@@ -35,6 +37,17 @@ export default function WritePage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsPending(true);
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    // 자동 슬러그 생성 (영문, 숫자, 하이픈만 허용)
+    const autoSlug = newTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
+    setSlug(autoSlug);
   };
 
   const handleUpload = async () => {
@@ -119,7 +132,7 @@ export default function WritePage() {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange}
               placeholder="제목을 입력하세요"
               className="w-full text-4xl md:text-5xl font-extrabold text-slate-900 border-none outline-none placeholder:text-slate-200 bg-transparent shrink-0"
               required
@@ -131,6 +144,19 @@ export default function WritePage() {
 
             <div className="space-y-6 shrink-0">
               <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">SLUG (URL)</label>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    placeholder="nextjs-seo-guide"
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                    name="slug"
+                    form="write-form"
+                    required
+                  />
+                </div>
                 <div>
                   <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">CATEGORY</label>
                   <select
@@ -146,6 +172,22 @@ export default function WritePage() {
                     <option value="일상">일상</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">DESCRIPTION (SEO)</label>
+                  <input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="검색 결과 요약 (150자 내외)"
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                    name="description"
+                    form="write-form"
+                    required
+                  />
+                </div>
                 <div>
                   <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">READ TIME</label>
                   <input
@@ -159,15 +201,16 @@ export default function WritePage() {
                   />
                 </div>
               </div>
+
               <div>
-                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">DESCRIPTION</label>
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block font-mono">OG IMAGE URL (OPTIONAL)</label>
                 <input
                   type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="짧은 요약을 입력하세요"
+                  value={ogImage}
+                  onChange={(e) => setOgImage(e.target.value)}
+                  placeholder="미입력 시 첫 번째 업로드 이미지 사용"
                   className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                  name="description"
+                  name="ogImage"
                   form="write-form"
                 />
               </div>
@@ -213,6 +256,8 @@ export default function WritePage() {
 
             <form id="write-form" action={createPost} onSubmit={handleSubmit} className="flex flex-col">
               <input type="hidden" name="title" value={title} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="ogImage" value={ogImage} />
               <input type="hidden" name="category" value={category} />
               <input type="hidden" name="readTime" value={readTime} />
               <input type="hidden" name="description" value={description} />

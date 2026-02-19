@@ -14,6 +14,8 @@ async function getPost(id: string) {
       return {
         id: docSnap.id,
         title: data?.title || "",
+        slug: data?.slug || "",
+        ogImage: data?.ogImage || "",
         content: data?.content || "",
         description: data?.description || "",
         category: data?.category || "개발",
