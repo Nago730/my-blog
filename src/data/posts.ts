@@ -6,6 +6,7 @@ export interface CloudinaryImage {
 
 export interface Post {
   id: string;
+  slug?: string;
   title: string;
   description: string;
   content: string;
@@ -21,6 +22,7 @@ export interface Post {
 export const mockPosts: Post[] = [
   {
     id: "1",
+    slug: "ai-agent-web-development-future",
     title: "AI 에이전트와 함께하는 웹 개발의 미래 탐색",
     description: "Antigravity와 같은 AI 에이전트가 우리가 코드를 작성하고 유지보수하는 방식을 어떻게 바꾸고 있는지 깊이 있게 살펴봅니다.",
     content: `## AI 에이전트: 개발의 새로운 패러다임

@@ -19,7 +19,7 @@ export async function generateStaticParams() {
       .get();
 
     return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
+      slug: doc.data().slug || doc.id,
     }));
   } catch (error) {
     console.error("Error generating static params:", error);
@@ -27,27 +27,39 @@ export async function generateStaticParams() {
   }
 }
 
-async function getPost(id: string) {
+async function getPost(slug: string) {
   try {
-    const docSnap = await adminDb.collection("posts").doc(id).get();
+    // 1. 슬러그로 먼저 조회
+    const querySnapshot = await adminDb
+      .collection("posts")
+      .where("slug", "==", slug)
+      .where("isDeleted", "==", false)
+      .limit(1)
+      .get();
+
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return { id: doc.id, ...doc.data() } as any;
+    }
+
+    // 2. 슬러그가 없거나 못 찾은 경우 ID로도 시도 (하위 호환성)
+    const docSnap = await adminDb.collection("posts").doc(slug).get();
 
     if (docSnap.exists) {
       const data = docSnap.data();
-      // Soft Delete된 문서라면 null 반환 (상세 페이지에서 notFound 트리거)
       if (data?.isDeleted === true) return null;
-
       return { id: docSnap.id, ...data } as any;
     }
 
-    return mockPosts.find((p) => p.id === id);
+    return mockPosts.find((p) => p.slug === slug || p.id === slug);
   } catch (error) {
     console.error("Firebase admin fetch error:", error);
-    return mockPosts.find((p) => p.id === id);
+    return mockPosts.find((p) => p.slug === slug);
   }
 }
 
-export default async function ArticleDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function ArticleDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const md = new MarkdownIt({
     html: true,
     linkify: true,
@@ -55,7 +67,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
     breaks: true,
   });
 
-  const post = await getPost(id);
+  const post = await getPost(slug);
 
   if (!post) {
     notFound();

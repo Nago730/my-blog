@@ -92,6 +92,9 @@ export async function deletePost(id: string) {
     const docSnap = await docRef.get();
 
     if (docSnap.exists) {
+      const data = docSnap.data();
+      const slug = data?.slug;
+
       // Soft Delete: 문서를 삭제하는 대신 상태만 변경
       await docRef.update({
         isDeleted: true,
@@ -99,7 +102,9 @@ export async function deletePost(id: string) {
         updatedAt: FieldValue.serverTimestamp(),
       });
 
-      // 이미지는 삭제하지 않고 유지합니다 (Soft Delete의 목적)
+      if (slug) {
+        revalidatePath(`/articles/${slug}`);
+      }
     }
   } catch (error) {
     console.error("Error deleting post:", error);
@@ -152,6 +157,6 @@ export async function updatePost(id: string, formData: FormData) {
   }
 
   revalidatePath("/articles");
-  revalidatePath(`/articles/${id}`);
-  redirect(`/articles/${id}`);
+  revalidatePath(`/articles/${slug}`);
+  redirect(`/articles/${slug}`);
 }
