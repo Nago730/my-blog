@@ -7,8 +7,8 @@ import CloudinaryImage from "@/components/CloudinaryImage";
 
 import DeletePostButton from "@/components/DeletePostButton";
 
-// 시간 기반 갱신을 끄고 (false), 글 작성 시에만 온디맨드로 갱신함
-export const revalidate = false;
+// 1시간마다 혹은 수정 시 갱시 (ISR)
+export const revalidate = 3600;
 
 // 서버 컴포넌트이므로 adminDb (서버 SDK)를 사용하여 API Key 이슈 회피
 async function getPosts() {

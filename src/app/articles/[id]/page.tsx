@@ -7,6 +7,26 @@ import ImageGallery from "@/components/ImageGallery";
 import AdminOnly from "@/components/AdminOnly";
 import DeletePostButton from "@/components/DeletePostButton";
 
+// 1시간마다 혹은 수정 시 갱신 (ISR)
+export const revalidate = 3600;
+
+// 빌드 시점에 정적 페이지 미리 생성 (SSG)
+export async function generateStaticParams() {
+  try {
+    const querySnapshot = await adminDb
+      .collection("posts")
+      .where("isDeleted", "==", false)
+      .get();
+
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+    }));
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return [];
+  }
+}
+
 async function getPost(id: string) {
   try {
     const docSnap = await adminDb.collection("posts").doc(id).get();
