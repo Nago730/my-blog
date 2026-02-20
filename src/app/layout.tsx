@@ -35,6 +35,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: ["/default-og.svg"],
   },
+  verification: {
+    other: {
+      "naver-site-verification": "fef1d1c5b6be35a81cb5ddab961e76448d6ad66d",
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
