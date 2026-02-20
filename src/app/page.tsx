@@ -2,10 +2,7 @@ import { mockPosts } from "../data/posts";
 import Link from "next/link";
 import { adminDb } from "@/lib/firebase-admin";
 
-import AdminOnly from "@/components/AdminOnly";
 import CloudinaryImage from "@/components/CloudinaryImage";
-
-import DeletePostButton from "@/components/DeletePostButton";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -56,14 +53,6 @@ export default async function ArticlesPage() {
               코드 한 줄에 담긴 고민부터 시스템 설계의 철학까지, 개발자로서 마주하는 모든 순간을 기록합니다.
             </p>
           </div>
-          <AdminOnly>
-            <Link
-              href="/admin/write"
-              className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-100 flex items-center space-x-2 hover:-translate-y-1 active:scale-95"
-            >
-              <span>✍️ 새 글 작성</span>
-            </Link>
-          </AdminOnly>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -86,13 +75,6 @@ export default async function ArticlesPage() {
                     {post.category}
                   </span>
                 </div>
-
-                {/* 관리자용 삭제 버튼: 호버 시에만 표시 */}
-                <AdminOnly>
-                  <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <DeletePostButton id={post.id} title={post.title} />
-                  </div>
-                </AdminOnly>
               </div>
 
               <div className="px-4 pb-6">

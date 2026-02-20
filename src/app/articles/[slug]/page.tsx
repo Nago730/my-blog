@@ -5,11 +5,12 @@ import MarkdownIt from "markdown-it";
 import { adminDb } from "@/lib/firebase-admin";
 import ImageGallery from "@/components/ImageGallery";
 import AdminOnly from "@/components/AdminOnly";
-import DeletePostButton from "@/components/DeletePostButton";
+import { EditPostButton, DeletePostButton } from "@/components/BlogActions";
 import CodeBlockCopy from "@/components/CodeBlockCopy";
 import { Metadata } from "next";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
+import { ArrowLeft } from "lucide-react";
 
 // 1시간마다 혹은 수정 시 갱인 (ISR)
 export const revalidate = 3600;
@@ -142,13 +143,8 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
               </Link>
               <AdminOnly>
                 <div className="flex items-center space-x-2">
-                  <Link
-                    href={`/admin/edit/${post.id}`}
-                    className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200 transition-all flex items-center space-x-1"
-                  >
-                    <span>✏️ 수정</span>
-                  </Link>
-                  <DeletePostButton id={post.id} title={post.title} />
+                  <EditPostButton id={post.id} />
+                  <DeletePostButton id={post.id} title={post.title} variant="full" />
                 </div>
               </AdminOnly>
             </div>
