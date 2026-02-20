@@ -6,7 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
-  onAuthStateChanged,
+  onIdTokenChanged,
   getIdToken
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -34,21 +34,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-
+    // onIdTokenChanged는 로그인, 로그아웃뿐만 아니라 토큰 갱신 시에도 트리거됩니다.
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
       if (user) {
-        // 토큰을 가져와서 쿠키에 저장 (Firebase Hosting/Next.js 관례에 따라 __session 이름 사용)
-        const token = await getIdToken(user);
-        Cookies.set("__session", token, { expires: 7, secure: true, sameSite: 'strict' });
+        setUser(user);
+        try {
+          const token = await user.getIdToken();
+          Cookies.set("__session", token, { expires: 7, secure: true, sameSite: 'strict' });
+        } catch (err) {
+          console.error("Token refresh error:", err);
+          // 토큰 갱신 실패 시 로그아웃 처리
+          logout();
+        }
       } else {
+        setUser(null);
         Cookies.remove("__session");
       }
-
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    // 주기적으로 토큰 유효성을 체크하여 만료 시 세션 정리 (10분마다)
+    const tokenCheckInterval = setInterval(async () => {
+      if (auth.currentUser) {
+        try {
+          // forceRefresh를 false로 하여 기존 토큰의 유효성만 확인
+          await auth.currentUser.getIdToken(false);
+        } catch (err) {
+          console.error("Session expired or invalid:", err);
+          logout();
+        }
+      }
+    }, 10 * 60 * 1000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(tokenCheckInterval);
+    };
   }, []);
 
   const loginWithGoogle = async () => {
