@@ -134,6 +134,37 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
     <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-100">
 
       <main className="pt-32 pb-20">
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BlogPosting",
+              "headline": post.title,
+              "description": post.description,
+              "image": post.ogImage || (post.images?.[0]?.url) || "https://justjun.com/default-og.svg",
+              "datePublished": post.date,
+              "author": {
+                "@type": "Person",
+                "name": "Jun"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Jun's Blog",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://justjun.com/default-og.svg"
+                }
+              },
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": `https://justjun.com/articles/${slug}`
+              }
+            })
+          }}
+        />
+
         <article className="max-w-3xl mx-auto px-4">
           {/* Metadata */}
           <div className="mb-8">
