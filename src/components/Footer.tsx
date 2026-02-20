@@ -12,12 +12,12 @@ export default function Footer() {
           </Link>
         </div>
         <p className="text-slate-500 text-sm mb-8">
-          &copy; 2026 Jun's Blog. 고민하고 기록하며 함께 성장하는 공간입니다.
+          &copy; 2026 Jun's Blog. 끄적이는 공간.
         </p>
 
         {/* Navigation Links */}
         <div className="flex justify-center space-x-10 mb-10">
-          <Link href="/articles" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
+          <Link href="/" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
             글 목록
           </Link>
         </div>

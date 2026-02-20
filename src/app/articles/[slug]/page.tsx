@@ -137,7 +137,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
           {/* Metadata */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-8">
-              <Link href="/articles" className="text-indigo-600 font-semibold text-sm hover:underline">
+              <Link href="/" className="text-indigo-600 font-semibold text-sm hover:underline">
                 ← 모든 글 목록으로 돌아가기
               </Link>
               <AdminOnly>

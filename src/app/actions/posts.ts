@@ -80,8 +80,8 @@ export async function createPost(formData: FormData) {
     throw new Error("글 저장 중 오류가 발생했습니다.");
   }
 
-  revalidatePath("/articles");
-  redirect("/articles", RedirectType.replace);
+  revalidatePath("/");
+  redirect("/", RedirectType.replace);
 }
 
 export async function deletePost(id: string) {
@@ -111,8 +111,8 @@ export async function deletePost(id: string) {
     throw new Error("글 삭제 중 오류가 발생했습니다.");
   }
 
-  revalidatePath("/articles");
-  redirect("/articles", RedirectType.replace);
+  revalidatePath("/");
+  redirect("/", RedirectType.replace);
 }
 
 export async function updatePost(id: string, formData: FormData) {
@@ -156,7 +156,7 @@ export async function updatePost(id: string, formData: FormData) {
     throw new Error("글 수정 중 오류가 발생했습니다.");
   }
 
-  revalidatePath("/articles");
+  revalidatePath("/");
   revalidatePath(`/articles/${slug}`);
   redirect(`/articles/${slug}`, RedirectType.replace);
 }
