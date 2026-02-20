@@ -28,9 +28,7 @@ export default function Navbar() {
             <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">Jun's Blog</span>
           </Link>
 
-          <div className="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
-            <Link href="/" className="hover:text-indigo-600 transition-colors">글 목록</Link>
-          </div>
+
 
           <div className="flex items-center space-x-4 min-w-[80px] justify-end relative">
             {/* 1. 인증 로딩 상태 대응 */}
