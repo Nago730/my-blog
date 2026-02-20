@@ -1,7 +1,7 @@
 import { adminDb } from "@/lib/firebase-admin";
 
 export async function GET() {
-  const baseUrl = 'https://justjun.com';
+  const baseUrl = 'https://www.justjun.com';
 
   let posts: any[] = [];
   try {
