@@ -97,22 +97,23 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
     breaks: true,
     highlight: function (str, lang) {
       const langLabel = lang || 'code';
-      const header = '<div class="code-block-header">' +
+      const copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      const header = '<span class="code-block-header">' +
         '<span class="code-block-lang">' + langLabel + '</span>' +
-        '<button class="code-copy-btn" type="button">복사</button>' +
-        '</div>';
+        '<button class="code-copy-btn" type="button">' + copyIcon + '</button>' +
+        '</span>';
 
       if (lang && hljs.getLanguage(lang)) {
         try {
-          return '<div class="code-block-wrapper">' + header +
-            '<pre><code class="hljs language-' + lang + '">' +
+          return '<pre class="code-block-wrapper">' + header +
+            '<code class="hljs language-' + lang + '">' +
             hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-            '</code></pre></div>';
+            '</code></pre>';
         } catch (__) { }
       }
 
-      return '<div class="code-block-wrapper">' + header +
-        '<pre><code class="hljs">' + md.utils.escapeHtml(str) + '</code></pre></div>';
+      return '<pre class="code-block-wrapper">' + header +
+        '<code class="hljs">' + md.utils.escapeHtml(str) + '</code></pre>';
     }
   });
 

@@ -35,9 +35,10 @@
     }
   }
 
-  /* Code block wrapper */
-  .prose .code-block-wrapper {
+  /* Code block wrapper — the <pre> itself is the wrapper */
+  .prose pre.code-block-wrapper {
     @apply rounded-2xl shadow-2xl border border-slate-700/50 my-8 bg-[#282c34] overflow-hidden;
+    padding: 0;
   }
 
   /* Thin header bar — single line with lang label + copy button */
@@ -48,6 +49,7 @@
     padding: 4px 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     background-color: rgba(255, 255, 255, 0.04);
+    white-space: normal;
   }
 
   .prose .code-block-lang {
@@ -67,10 +69,13 @@
     background: none;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 4px;
-    padding: 1px 8px;
+    padding: 2px 6px;
     cursor: pointer;
-    line-height: 1.4;
+    line-height: 1;
     transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .prose .code-copy-btn:hover {
@@ -84,20 +89,18 @@
     border-color: rgba(52, 211, 153, 0.3);
   }
 
-  /* Unify background for Atom One Dark theme (#282c34) */
-  .prose .code-block-wrapper pre {
-    @apply rounded-none p-6 bg-[#282c34];
-    margin: 0;
-    border: none;
-    box-shadow: none;
+  /* Code content inside wrapper */
+  .prose pre.code-block-wrapper code.hljs {
+    @apply text-sm p-6 bg-transparent block;
+    background-color: transparent !important;
   }
 
-  .prose pre.hljs,
-  .prose>pre {
+  /* Standalone pre (not our wrapper) — keep original style */
+  .prose pre:not(.code-block-wrapper) {
     @apply rounded-2xl shadow-2xl p-6 border border-slate-700/50 my-8 bg-[#282c34];
   }
 
-  .prose pre code.hljs {
+  .prose pre:not(.code-block-wrapper) code.hljs {
     @apply text-sm p-0 bg-transparent;
     background-color: transparent !important;
   }
