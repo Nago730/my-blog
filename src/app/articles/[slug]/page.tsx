@@ -6,6 +6,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import ImageGallery from "@/components/ImageGallery";
 import AdminOnly from "@/components/AdminOnly";
 import DeletePostButton from "@/components/DeletePostButton";
+import CodeBlockCopy from "@/components/CodeBlockCopy";
 import { Metadata } from "next";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
@@ -95,15 +96,23 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
     typographer: true,
     breaks: true,
     highlight: function (str, lang) {
+      const langLabel = lang || 'code';
+      const header = '<div class="code-block-header">' +
+        '<span class="code-block-lang">' + langLabel + '</span>' +
+        '<button class="code-copy-btn" type="button">복사</button>' +
+        '</div>';
+
       if (lang && hljs.getLanguage(lang)) {
         try {
-          return '<pre><code class="hljs language-' + lang + '">' +
+          return '<div class="code-block-wrapper">' + header +
+            '<pre><code class="hljs language-' + lang + '">' +
             hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-            '</code></pre>';
+            '</code></pre></div>';
         } catch (__) { }
       }
 
-      return '<pre><code class="hljs">' + md.utils.escapeHtml(str) + '</code></pre>';
+      return '<div class="code-block-wrapper">' + header +
+        '<pre><code class="hljs">' + md.utils.escapeHtml(str) + '</code></pre></div>';
     }
   });
 
@@ -170,6 +179,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
             className="prose prose-slate lg:prose-xl prose-indigo max-w-none"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
+          <CodeBlockCopy />
 
 
         </article>

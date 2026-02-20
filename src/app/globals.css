@@ -35,7 +35,63 @@
     }
   }
 
+  /* Code block wrapper */
+  .prose .code-block-wrapper {
+    @apply rounded-2xl shadow-2xl border border-slate-700/50 my-8 bg-[#282c34] overflow-hidden;
+  }
+
+  /* Thin header bar — single line with lang label + copy button */
+  .prose .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .prose .code-block-lang {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .prose .code-copy-btn {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #9ca3af;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 1px 8px;
+    cursor: pointer;
+    line-height: 1.4;
+    transition: all 0.15s ease;
+  }
+
+  .prose .code-copy-btn:hover {
+    color: #e5e7eb;
+    border-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .prose .code-copy-btn.copied {
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.3);
+  }
+
   /* Unify background for Atom One Dark theme (#282c34) */
+  .prose .code-block-wrapper pre {
+    @apply rounded-none p-6 bg-[#282c34];
+    margin: 0;
+    border: none;
+    box-shadow: none;
+  }
+
   .prose pre.hljs,
   .prose>pre {
     @apply rounded-2xl shadow-2xl p-6 border border-slate-700/50 my-8 bg-[#282c34];
