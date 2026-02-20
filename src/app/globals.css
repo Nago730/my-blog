@@ -35,13 +35,15 @@
     }
   }
 
-  /* Code block styling */
-  .prose pre {
-    @apply rounded-2xl bg-slate-900 shadow-2xl p-6 border border-slate-800 my-8;
+  /* Unify background for Atom One Dark theme (#282c34) */
+  .prose pre.hljs,
+  .prose>pre {
+    @apply rounded-2xl shadow-2xl p-6 border border-slate-700/50 my-8 bg-[#282c34];
   }
 
-  .prose pre code {
-    @apply text-sm text-slate-200 bg-transparent p-0;
+  .prose pre code.hljs {
+    @apply text-sm p-0 bg-transparent;
+    background-color: transparent !important;
   }
 
   /* Heading customizations */

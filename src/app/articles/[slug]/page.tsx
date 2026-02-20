@@ -7,8 +7,10 @@ import ImageGallery from "@/components/ImageGallery";
 import AdminOnly from "@/components/AdminOnly";
 import DeletePostButton from "@/components/DeletePostButton";
 import { Metadata } from "next";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
 
-// 1시간마다 혹은 수정 시 갱신 (ISR)
+// 1시간마다 혹은 수정 시 갱인 (ISR)
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -92,6 +94,17 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
     linkify: true,
     typographer: true,
     breaks: true,
+    highlight: function (str, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          return '<pre><code class="hljs language-' + lang + '">' +
+            hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+            '</code></pre>';
+        } catch (__) { }
+      }
+
+      return '<pre><code class="hljs">' + md.utils.escapeHtml(str) + '</code></pre>';
+    }
   });
 
   const post = await getPost(slug);
