@@ -7,7 +7,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "글 목록 | Jun's Blog",
-  description: "코드 한 줄의 고민부터 시스템 설계까지, 개발자로서 마주하는 모든 순간의 기록을 담은 블로그입니다.",
+  description: "개발자로서 마주하는 모든 여정의 순간, 그 기록을 담은 블로그입니다.",
   alternates: {
     canonical: `/`,
   },
@@ -50,7 +50,7 @@ export default async function ArticlesPage() {
               모든 글 목록
             </h1>
             <p className="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
-              코드 한 줄에 담긴 고민부터 시스템 설계의 철학까지, 개발자로서 마주하는 모든 순간을 기록합니다.
+              개발자로서 마주하는 모든 여정의 순간을 기록합니다.
             </p>
           </div>
         </div>
