@@ -23,6 +23,8 @@ export default function WritePage() {
   const [category, setCategory] = useState("개발");
   const [readTime, setReadTime] = useState("");
   const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   const md = useMemo(() => new MarkdownIt({
     html: true,
@@ -90,6 +92,36 @@ export default function WritePage() {
       console.error("Cloudinary Auth Failed:", err);
       alert("업로드 권한을 확인하는 중 오류가 발생했습니다.");
     }
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const inputTags = tagInput.split(/[\s,]+/).filter(tag => tag.trim() !== "");
+
+      if (inputTags.length > 0) {
+        const newTags = [...tags];
+        let changed = false;
+
+        inputTags.forEach(tag => {
+          if (!newTags.includes(tag)) {
+            newTags.push(tag);
+            changed = true;
+          }
+        });
+
+        if (changed) {
+          setTags(newTags);
+        }
+        setTagInput("");
+      }
+    } else if (e.key === "Backspace" && !tagInput && tags.length > 0) {
+      setTags(tags.slice(0, -1));
+    }
+  };
+
+  const removeTag = (indexToRemove: number) => {
+    setTags(tags.filter((_, index) => index !== indexToRemove));
   };
 
   return (
@@ -252,6 +284,34 @@ export default function WritePage() {
                   )}
                 </div>
               </div>
+
+              <div>
+                <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 block font-mono">TAGS</label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {tags.map((tag, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => removeTag(index)}
+                      className="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold hover:bg-red-50 hover:text-red-600 transition-all flex items-center space-x-1 group"
+                      title="클릭하여 삭제"
+                    >
+                      <span># {tag}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  placeholder="태그 입력 후 엔터 (클릭 시 삭제)"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                />
+              </div>
             </div>
 
             <form id="write-form" action={createPost} onSubmit={handleSubmit} className="flex flex-col">
@@ -268,6 +328,10 @@ export default function WritePage() {
                   <input type="hidden" name="images[]" value={img.url} />
                   <input type="hidden" name="publicIds[]" value={img.publicId} />
                 </div>
+              ))}
+
+              {tags.map((tag, idx) => (
+                <input key={idx} type="hidden" name="tags[]" value={tag} />
               ))}
 
               <textarea

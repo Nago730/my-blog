@@ -202,6 +202,17 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
             <ImageGallery images={images} title={post.title} />
           </div>
 
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-12">
+              {post.tags.map((tag: string, index: number) => (
+                <span key={index} className="text-sm font-medium text-indigo-600 bg-indigo-50/50 px-3 py-1 rounded-full border border-indigo-100/50">
+                  # {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           {/* Content */}
           <div
             className="prose prose-slate lg:prose-xl prose-indigo max-w-none"

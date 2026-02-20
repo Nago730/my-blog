@@ -21,6 +21,7 @@ async function getPost(id: string) {
         category: data?.category || "개발",
         readTime: data?.readTime || "",
         images: data?.images || [],
+        tags: data?.tags || [],
       };
     }
     return null;

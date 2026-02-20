@@ -40,6 +40,7 @@ export async function createPost(formData: FormData) {
   const category = formData.get("category") as string;
   const readTime = formData.get("readTime") as string;
   const content = formData.get("content") as string;
+  const tags = formData.getAll("tags[]") as string[];
 
   // 다중 이미지 처리
   const imageUrls = formData.getAll("images[]") as string[];
@@ -64,6 +65,8 @@ export async function createPost(formData: FormData) {
       category,
       readTime,
       content,
+      // 태그 배열 저장
+      tags,
       // 다중 이미지 배열 저장
       images,
       // 정렬용 날짜 (문자열)
@@ -125,6 +128,7 @@ export async function updatePost(id: string, formData: FormData) {
   const category = formData.get("category") as string;
   const readTime = formData.get("readTime") as string;
   const content = formData.get("content") as string;
+  const tags = formData.getAll("tags[]") as string[];
 
   const imageUrls = formData.getAll("images[]") as string[];
   const publicIds = formData.getAll("publicIds[]") as string[];
@@ -148,6 +152,7 @@ export async function updatePost(id: string, formData: FormData) {
       category,
       readTime,
       content,
+      tags,
       images,
       updatedAt: FieldValue.serverTimestamp(),
     });

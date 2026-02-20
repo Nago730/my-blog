@@ -86,9 +86,22 @@ export default async function ArticlesPage() {
                 <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2 leading-snug">
                   {post.title}
                 </h3>
-                <p className="text-slate-600 line-clamp-2 text-sm leading-relaxed">
+                <p className="text-slate-600 line-clamp-2 text-sm leading-relaxed mb-4">
                   {post.description}
                 </p>
+
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {post.tags.slice(0, 3).map((tag: string, idx: number) => (
+                      <span key={idx} className="text-[10px] font-semibold text-indigo-500 bg-indigo-50/50 px-2 py-0.5 rounded-full border border-indigo-100/50">
+                        #{tag}
+                      </span>
+                    ))}
+                    {post.tags.length > 3 && (
+                      <span className="text-[10px] text-slate-400">+{post.tags.length - 3}</span>
+                    )}
+                  </div>
+                )}
               </div>
             </Link>
           ))}
