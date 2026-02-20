@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // 관리자 권한이 필요한 경로 패턴
-const ADMIN_PATHS = ['/admin', '/admin/write', '/admin/projects/write'];
+const ADMIN_PATHS = ['/admin', '/admin/write'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

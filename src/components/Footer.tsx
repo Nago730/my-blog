@@ -20,9 +20,6 @@ export default function Footer() {
           <Link href="/articles" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
             글 목록
           </Link>
-          <Link href="/projects" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
-            프로젝트
-          </Link>
         </div>
 
         <div className="flex justify-center space-x-6 text-slate-400">
