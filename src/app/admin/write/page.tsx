@@ -34,7 +34,12 @@ export default function WritePage() {
   }), []);
 
   const previewHtml = useMemo(() => {
-    return md.render(content || "# 여기에 미리보기가 표시됩니다\n\n내용을 입력해 보세요.");
+    // 한국어 마크다운 파싱 이슈(공백 규칙) 해결을 위한 전처리
+    const processedContent = (content || "# 여기에 미리보기가 표시됩니다\n\n내용을 입력해 보세요.")
+      .replace(/([가-힣])\*\*(?=[\p{P}])/gu, '$1 **')
+      .replace(/([\p{P}])\*\*(?=[가-힣])/gu, '$1** ');
+
+    return md.render(processedContent);
   }, [content, md]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

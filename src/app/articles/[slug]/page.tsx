@@ -125,7 +125,14 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
   }
 
   // 데이터의 앞뒤 공백을 제거하고, 행별 들여쓰기가 있는 경우를 대비해 처리할 수 있습니다.
-  const cleanContent = typeof post.content === 'string' ? post.content.trim() : '';
+  let cleanContent = typeof post.content === 'string' ? post.content.trim() : '';
+
+  // 마크다운 파싱 이슈 해결: 한국어 문자와 **(굵게)가 붙어있을 때 파싱되지 않는 문제를 해결하기 위해 공백을 추가합니다.
+  // 특히 따옴표와 같은 문장 부호가 포함된 경우(예: **"텍스트"**) CommonMark 규칙에 의해 앞뒤에 공백이나 문장 부호가 필요합니다.
+  cleanContent = cleanContent
+    .replace(/([가-힣])\*\*(?=[\p{P}])/gu, '$1 **')
+    .replace(/([\p{P}])\*\*(?=[가-힣])/gu, '$1** ');
+
   const htmlContent = md.render(cleanContent);
 
   const images = post.images || [];
