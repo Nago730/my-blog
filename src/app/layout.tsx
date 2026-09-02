@@ -10,35 +10,30 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL("https://justjun.com"),
   title: {
-    default: "Jun's Blog",
-    template: "%s | Jun's Blog",
+    default: "My Space",
+    template: "%s | My Space",
   },
-  description: "개발 경험을 공유하는 블로그입니다.",
-  keywords: ["Next.js", "React", "TypeScript", "Blog", "Development"],
+  description: "일정 관리, 학습 및 기록을 담은 통합 개인 웹 서비스",
+  keywords: ["Next.js", "React", "TypeScript", "Workspace"],
   authors: [{ name: "Jun" }],
   creator: "Jun",
   openGraph: {
     type: "website",
     locale: "ko_KR",
     url: "https://justjun.com",
-    siteName: "Jun's Blog",
+    siteName: "My Space",
     images: [
       {
         url: "/default-og.svg",
         width: 1200,
         height: 630,
-        alt: "Jun's Blog",
+        alt: "My Space",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     images: ["/default-og.svg"],
-  },
-  verification: {
-    other: {
-      "naver-site-verification": "fef1d1c5b6be35a81cb5ddab961e76448d6ad66d",
-    },
   },
 };
 
@@ -55,3 +50,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

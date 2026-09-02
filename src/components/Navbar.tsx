@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useRef, useEffect } from "react";
-import { LoginButton, CreatePostButton, CreateProjectButton, LogoutButton } from "./BlogActions";
+import { LoginButton, LogoutButton } from "./BlogActions";
 import { ChevronDown } from "lucide-react";
 
 export default function Navbar() {
@@ -27,10 +27,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center cursor-pointer group">
-            <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">Jun's Blog</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">My Space</span>
           </Link>
-
-
 
           <div className="flex items-center space-x-4 min-w-[80px] justify-end relative">
             {/* 1. 인증 로딩 상태 대응 */}
@@ -74,13 +72,6 @@ export default function Navbar() {
                     </div>
 
                     <div className="p-1.5 space-y-1">
-                      {isAdmin && (
-                        <>
-                          <CreatePostButton onClick={() => setIsMenuOpen(false)} />
-                          <CreateProjectButton onClick={() => setIsMenuOpen(false)} />
-                        </>
-                      )}
-
                       <LogoutButton onClick={() => setIsMenuOpen(false)} />
                     </div>
                   </div>
@@ -96,3 +87,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
