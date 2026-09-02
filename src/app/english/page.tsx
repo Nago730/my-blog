@@ -76,6 +76,7 @@ export default function EnglishPage() {
   const [userAnswer, setUserAnswer] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [micErrorMsg, setMicErrorMsg] = useState<string | null>(null);
 
   // Analysis state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -127,6 +128,7 @@ export default function EnglishPage() {
     setIsGenerating(true);
     setCurrentFeedback(null);
     setUserAnswer("");
+    setMicErrorMsg(null);
     try {
       const res = await generateIeltsQuestion(part);
       setCurrentQuestion(res.question);
@@ -141,9 +143,10 @@ export default function EnglishPage() {
 
   // Speech Recognition
   const handleToggleVoice = () => {
+    setMicErrorMsg(null);
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("이 브라우저나 모바일 기기에서는 음성 인식을 지원하지 않습니다.");
+      alert("이 브라우저나 모바일 기기에서는 음성 인식을 지원하지 않습니다. 최신 Chrome 또는 Safari를 이용해 주세요.");
       return;
     }
 
@@ -160,6 +163,7 @@ export default function EnglishPage() {
 
       recognition.onstart = () => {
         setIsListening(true);
+        setMicErrorMsg(null);
       };
 
       recognition.onresult = (event: any) => {
@@ -175,6 +179,15 @@ export default function EnglishPage() {
       recognition.onerror = (event: any) => {
         console.error("Speech Recognition Error:", event.error);
         setIsListening(false);
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          setMicErrorMsg(
+            "마이크 접근 권한이 차단되었습니다. 브라우저 주소창 왼쪽의 마이크/자물쇠 아이콘(🔒 또는 🎙️)을 누른 후 '마이크 허용'으로 변경해 주세요!"
+          );
+        } else if (event.error === "no-speech") {
+          setMicErrorMsg("음성이 감지되지 않았습니다. 마이크에 가까이 대고 다시 말씀해 주세요.");
+        } else {
+          setMicErrorMsg(`음성 인식 오류 (${event.error}). 텍스트로 직접 입력하실 수도 있습니다.`);
+        }
       };
 
       recognition.onend = () => {
@@ -185,6 +198,7 @@ export default function EnglishPage() {
     } catch (error) {
       console.error("Speech start error:", error);
       setIsListening(false);
+      setMicErrorMsg("마이크 시작 중 오류가 발생했습니다. 권한 설정을 확인해 주세요.");
     }
   };
 
@@ -353,6 +367,13 @@ export default function EnglishPage() {
                   </span>
                 )}
               </div>
+
+              {micErrorMsg && (
+                <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-2xl leading-relaxed flex items-start space-x-2">
+                  <span className="text-base">⚠️</span>
+                  <span>{micErrorMsg}</span>
+                </div>
+              )}
 
               {/* Textarea for spoken answer */}
               <div className="relative">
