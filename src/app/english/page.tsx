@@ -82,6 +82,12 @@ export default function EnglishPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState<IeltsFeedback | null>(null);
 
+  // Model Answer Shadowing Practice state
+  const [isShadowingListening, setIsShadowingListening] = useState(false);
+  const [shadowingSpokenText, setShadowingSpokenText] = useState("");
+  const [shadowingAccuracy, setShadowingAccuracy] = useState(0);
+  const [shadowingMatchedWords, setShadowingMatchedWords] = useState<{ word: string; isMatched: boolean }[]>([]);
+
   // Logs & History state
   const [logs, setLogs] = useState<IeltsPracticeLog[]>(MOCK_INITIAL_LOGS);
   const [selectedLog, setSelectedLog] = useState<IeltsPracticeLog | null>(null);
@@ -199,6 +205,88 @@ export default function EnglishPage() {
       console.error("Speech start error:", error);
       setIsListening(false);
       setMicErrorMsg("마이크 시작 중 오류가 발생했습니다. 권한 설정을 확인해 주세요.");
+    }
+  };
+
+  // Model Answer Shadowing Speech Recognition & Accuracy Match
+  const handleToggleShadowingVoice = () => {
+    if (!currentFeedback?.improvedAnswer) return;
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("이 브라우저나 모바일 기기에서는 음성 인식을 지원하지 않습니다.");
+      return;
+    }
+
+    if (isShadowingListening) {
+      setIsShadowingListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      recognition.onstart = () => {
+        setIsShadowingListening(true);
+        setShadowingSpokenText("");
+      };
+
+      recognition.onresult = (event: any) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+
+        if (transcript && currentFeedback.improvedAnswer) {
+          setShadowingSpokenText(transcript);
+
+          // Calculate Accuracy vs Improved Answer
+          const cleanTarget = currentFeedback.improvedAnswer
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, "")
+            .split(/\s+/)
+            .filter(Boolean);
+
+          const cleanSpoken = transcript
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, "")
+            .split(/\s+/)
+            .filter(Boolean);
+
+          const spokenSet = new Set(cleanSpoken);
+          let matchedCount = 0;
+
+          const words = cleanTarget.map((word) => {
+            const isMatched = spokenSet.has(word);
+            if (isMatched) matchedCount++;
+            return { word, isMatched };
+          });
+
+          const accuracy = cleanTarget.length > 0
+            ? Math.min(100, Math.round((matchedCount / cleanTarget.length) * 100))
+            : 0;
+
+          setShadowingAccuracy(accuracy);
+          setShadowingMatchedWords(words);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Shadowing Speech Error:", event.error);
+        setIsShadowingListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsShadowingListening(false);
+      };
+
+      recognition.start();
+    } catch (error) {
+      console.error("Shadowing speech start error:", error);
+      setIsShadowingListening(false);
     }
   };
 
@@ -463,23 +551,102 @@ export default function EnglishPage() {
                   </div>
                 </div>
 
-                {/* Recommended Model Answer */}
-                <div className="space-y-2">
+                {/* Recommended Model Answer & Interactive Shadowing Practice */}
+                <div className="space-y-4 pt-2 border-t border-slate-100">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-extrabold text-slate-700 flex items-center space-x-1.5">
-                      <Sparkles size={14} className="text-amber-500" />
-                      <span>Band 6.5+ 추천 모범 답안</span>
+                    <span className="text-xs font-extrabold text-slate-900 flex items-center space-x-1.5">
+                      <Sparkles size={16} className="text-amber-500" />
+                      <span>Band 6.5+ 모범 답안 섀도잉 (따라 읽기)</span>
                     </span>
-                    <button
-                      onClick={() => handleCopyModelAnswer(currentFeedback.improvedAnswer)}
-                      className="flex items-center space-x-1 text-xs text-indigo-600 hover:text-indigo-700 font-bold"
-                    >
-                      {copiedText ? <Check size={14} /> : <Copy size={14} />}
-                      <span>{copiedText ? "복사됨" : "복사하기"}</span>
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleSpeakQuestion(currentFeedback.improvedAnswer)}
+                        className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors flex items-center space-x-1"
+                        title="원어민 느린 발음으로 모범 답안 듣기"
+                      >
+                        <Volume2 size={14} />
+                        <span>듣기 (TTS)</span>
+                      </button>
+                      <button
+                        onClick={() => handleCopyModelAnswer(currentFeedback.improvedAnswer)}
+                        className="flex items-center space-x-1 text-xs text-indigo-600 hover:text-indigo-700 font-bold"
+                      >
+                        {copiedText ? <Check size={14} /> : <Copy size={14} />}
+                        <span>{copiedText ? "복사됨" : "복사"}</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="p-4 bg-slate-900 text-slate-100 rounded-2xl text-sm font-mono leading-relaxed">
+
+                  {/* Model Answer Box */}
+                  <div className="p-4 bg-slate-900 text-slate-100 rounded-2xl text-sm font-mono leading-relaxed shadow-inner">
                     {currentFeedback.improvedAnswer}
+                  </div>
+
+                  {/* Shadowing Practice Widget */}
+                  <div className="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 sm:p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-xs font-black text-indigo-950 flex items-center space-x-1.5">
+                          <Mic size={14} className="text-indigo-600" />
+                          <span>모범 답안 소리 내어 읽기 연습</span>
+                        </h4>
+                        <p className="text-[11px] text-indigo-600 mt-0.5">
+                          마이크를 켜고 위 모범 답안을 읽으면 단어별 발음 일치도를 분석해 드립니다.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={handleToggleShadowingVoice}
+                        className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-all active:scale-95 flex items-center space-x-1.5 shrink-0 ${
+                          isShadowingListening
+                            ? "bg-rose-600 text-white animate-pulse shadow-md"
+                            : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200"
+                        }`}
+                      >
+                        {isShadowingListening ? <MicOff size={14} /> : <Mic size={14} />}
+                        <span>{isShadowingListening ? "녹음 정지" : "따라 읽기 시작"}</span>
+                      </button>
+                    </div>
+
+                    {/* Shadowing Results & Accuracy Display */}
+                    {shadowingSpokenText && (
+                      <div className="bg-white rounded-xl p-4 border border-indigo-100 space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                          <span className="text-xs font-bold text-slate-700">인식된 나의 발음</span>
+                          <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full">
+                            발음 일치율: {shadowingAccuracy}% 🎯
+                          </span>
+                        </div>
+
+                        {/* Spoken Text Display */}
+                        <p className="text-xs text-slate-700 font-medium italic">
+                          &quot;{shadowingSpokenText}&quot;
+                        </p>
+
+                        {/* Word Match Checklist */}
+                        {shadowingMatchedWords.length > 0 && (
+                          <div className="pt-2">
+                            <span className="text-[10px] font-extrabold text-slate-400 block mb-1.5 uppercase">
+                              단어별 정확도 체크
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {shadowingMatchedWords.map((item, idx) => (
+                                <span
+                                  key={idx}
+                                  className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                                    item.isMatched
+                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                      : "bg-slate-100 text-slate-400"
+                                  }`}
+                                >
+                                  {item.word} {item.isMatched ? "✓" : ""}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
