@@ -21,9 +21,10 @@ export default function Home() {
     },
     {
       title: "영어 공부",
+      href: "/english",
       icon: BookOpen,
       gradient: "from-emerald-500 to-teal-600",
-      status: "준비 중",
+      status: "이용 가능",
     },
     {
       title: "버킷리스트",
