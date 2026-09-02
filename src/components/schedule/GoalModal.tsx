@@ -83,15 +83,20 @@ export default function GoalModal({
       return;
     }
 
-    // 모바일 기기 마이크 허용 팝업 강제 요청
+    // 모바일 기기 및 PC 마이크 권한/장치 확인
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach((track) => track.stop());
       } catch (err: any) {
-        console.error("마이크 권한 거부됨:", err);
-        alert("마이크 사용 권한이 차단되어 있습니다. 브라우저 주소창 마이크 권한을 허용해 주세요!");
-        return;
+        console.warn("MediaDevices getUserMedia notice:", err);
+        if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+          alert("컴퓨터에 연결된 마이크 장치를 찾을 수 없습니다. 마이크/이어폰 연결 상태를 확인해 주세요.");
+          return;
+        } else if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          alert("마이크 사용 권한이 차단되어 있습니다. 브라우저 주소창 마이크 권한을 허용해 주세요!");
+          return;
+        }
       }
     }
 
