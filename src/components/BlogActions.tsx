@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { User, LogOut } from "lucide-react";
+import { Lock, LogOut, ShieldCheck } from "lucide-react";
+import PasscodeModal from "./PasscodeModal";
 
 /**
  * 네비게이션 드롭다운용 공통 버튼 스타일
@@ -59,24 +61,32 @@ function NavActionButton({
 }
 
 /**
- * 로그인 버튼
+ * 본인 확인 (로그인 / 비밀번호 인증) 버튼
  */
 export function LoginButton() {
-  const { loginWithGoogle, loading } = useAuth();
+  const { isOwner } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <button
-      onClick={loginWithGoogle}
-      disabled={loading}
-      className="flex items-center justify-center w-10 h-10 text-slate-400 hover:text-slate-700 transition-all active:scale-95 disabled:opacity-50 group"
-      title="로그인하기"
-    >
-      {loading ? (
-        <div className="w-5 h-5 border-2 border-slate-200 border-t-indigo-600 rounded-full animate-spin" />
-      ) : (
-        <User size={24} className="group-hover:scale-110 transition-transform" />
-      )}
-    </button>
+    <>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all active:scale-95 group ${
+          isOwner
+            ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+            : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+        }`}
+        title={isOwner ? "본인 인증됨 (클릭 시 확인)" : "본인 확인 (비밀번호 입력)"}
+      >
+        {isOwner ? (
+          <ShieldCheck size={20} className="text-emerald-600" />
+        ) : (
+          <Lock size={20} className="group-hover:scale-110 transition-transform" />
+        )}
+      </button>
+
+      <PasscodeModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   );
 }
 
@@ -84,10 +94,10 @@ export function LoginButton() {
  * 로그아웃 버튼
  */
 export function LogoutButton({ onClick }: { onClick?: () => void }) {
-  const { logout } = useAuth();
+  const { ownerSignOut } = useAuth();
 
   const handleLogout = () => {
-    logout();
+    ownerSignOut();
     if (onClick) onClick();
   };
 
@@ -97,7 +107,7 @@ export function LogoutButton({ onClick }: { onClick?: () => void }) {
       variant="rose"
       icon={<LogOut size={16} />}
     >
-      로그아웃
+      인증 해제 (로그아웃)
     </NavActionButton>
   );
 }

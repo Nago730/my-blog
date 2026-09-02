@@ -12,6 +12,7 @@ import {
 import { auth } from "@/lib/firebase";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { verifyOwnerPasscode, checkIsOwner, ownerLogout } from "@/app/actions/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -20,21 +21,28 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
+  isOwner: boolean;
+  verifyPasscode: (passcode: string) => Promise<{ success: boolean; message?: string }>;
+  ownerSignOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// UI용 관리자 이메일 체크 (보완책: 실제 보안은 서버에서 처리됨)
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // onIdTokenChanged는 로그인, 로그아웃뿐만 아니라 토큰 갱신 시에도 트리거됩니다.
+    // Check Owner Auth status from cookie/server
+    checkIsOwner().then((status) => {
+      setIsOwner(status);
+    });
+
     const unsubscribe = onIdTokenChanged(auth, async (user) => {
       if (user) {
         setUser(user);
@@ -43,7 +51,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           Cookies.set("__session", token, { expires: 7, secure: true, sameSite: 'strict' });
         } catch (err) {
           console.error("Token refresh error:", err);
-          // 토큰 갱신 실패 시 로그아웃 처리
           logout();
         }
       } else {
@@ -53,11 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    // 주기적으로 토큰 유효성을 체크하여 만료 시 세션 정리 (10분마다)
     const tokenCheckInterval = setInterval(async () => {
       if (auth.currentUser) {
         try {
-          // forceRefresh를 false로 하여 기존 토큰의 유효성만 확인
           await auth.currentUser.getIdToken(false);
         } catch (err) {
           console.error("Session expired or invalid:", err);
@@ -71,6 +76,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearInterval(tokenCheckInterval);
     };
   }, []);
+
+  const handleVerifyPasscode = async (passcode: string) => {
+    const res = await verifyOwnerPasscode(passcode);
+    if (res.success) {
+      setIsOwner(true);
+    }
+    return res;
+  };
+
+  const handleOwnerSignOut = async () => {
+    await ownerLogout();
+    setIsOwner(false);
+    router.refresh();
+  };
 
   const loginWithGoogle = async () => {
     setError(null);
@@ -94,18 +113,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await signOut(auth);
+      await ownerLogout();
+      setIsOwner(false);
       Cookies.remove("__session");
-      router.refresh(); // 미들웨어 상태 갱신을 위해 새로고침
+      router.refresh();
     } catch (err) {
       console.error("Logout Error:", err);
       setError("로그아웃 중 오류가 발생했습니다.");
     }
   };
 
-  const isAdmin = user ? user.email === ADMIN_EMAIL : false;
+  const isAdmin = isOwner || (user ? user.email === ADMIN_EMAIL : false);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, loginWithGoogle, logout, isAdmin }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        loginWithGoogle,
+        logout,
+        isAdmin,
+        isOwner,
+        verifyPasscode: handleVerifyPasscode,
+        ownerSignOut: handleOwnerSignOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
