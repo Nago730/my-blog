@@ -148,7 +148,7 @@ export default function EnglishPage() {
   };
 
   // Speech Recognition
-  const handleToggleVoice = () => {
+  const handleToggleVoice = async () => {
     setMicErrorMsg(null);
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -159,6 +159,21 @@ export default function EnglishPage() {
     if (isListening) {
       setIsListening(false);
       return;
+    }
+
+    // 모바일 기기에서 브라우저 마이크 허용 팝업 강제 요청
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // 허용 팝업 승인 후 스트림 트랙 즉시 해제하여 SpeechRecognition이 독점하도록 함
+        stream.getTracks().forEach((track) => track.stop());
+      } catch (err: any) {
+        console.error("마이크 권한 거부됨:", err);
+        setMicErrorMsg(
+          "마이크 접근 권한이 차단되었습니다. 브라우저 주소창 왼쪽의 마이크/자물쇠 아이콘(🔒 또는 🎙️)을 누른 후 '마이크 허용'으로 변경해 주세요!"
+        );
+        return;
+      }
     }
 
     try {
@@ -209,7 +224,7 @@ export default function EnglishPage() {
   };
 
   // Model Answer Shadowing Speech Recognition & Accuracy Match
-  const handleToggleShadowingVoice = () => {
+  const handleToggleShadowingVoice = async () => {
     if (!currentFeedback?.improvedAnswer) return;
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -221,6 +236,18 @@ export default function EnglishPage() {
     if (isShadowingListening) {
       setIsShadowingListening(false);
       return;
+    }
+
+    // 모바일 기기 마이크 허용 팝업 요청
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+      } catch (err: any) {
+        console.error("마이크 권한 거부됨:", err);
+        alert("마이크 사용 권한을 허용해 주셔야 섀도잉 연습이 가능합니다.");
+        return;
+      }
     }
 
     try {

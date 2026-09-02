@@ -42,11 +42,23 @@ export default function DailySchedule({
     onDateChange(d.toISOString().split("T")[0]);
   };
 
-  const handleVoiceInput = () => {
+  const handleVoiceInput = async () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("이 브라우저나 기기에서는 음성 입력을 지원하지 않습니다.");
       return;
+    }
+
+    // 모바일 기기 마이크 허용 팝업 강제 요청
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+      } catch (err: any) {
+        console.error("마이크 권한 거부됨:", err);
+        alert("마이크 사용 권한이 차단되어 있습니다. 브라우저 주소창 마이크 권한을 허용해 주세요!");
+        return;
+      }
     }
 
     try {
