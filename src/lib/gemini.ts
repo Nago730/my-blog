@@ -8,9 +8,10 @@ export interface GeminiRequestOptions {
 }
 
 const DEFAULT_MODELS = [
-  'gemini-2.5-flash-lite',
+  'gemini-3.5-flash-lite',
   'gemini-flash-latest',
   'gemini-3.8-flash',
+  'gemini-2.5-flash-lite',
   'gemini-2.5-pro',
   'gemini-pro-latest'
 ];
