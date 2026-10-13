@@ -1,6 +1,66 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ------------------------------------------------------------------
+ * IELTS Writing Gym — 학습 최적화 디자인 토큰
+ * - paper(기본): 따뜻한 미색 배경 + 먹색 텍스트 → 장시간 읽기/쓰기 피로 최소화
+ * - night: 순흑 대신 따뜻한 짙은 회갈색 → 야간 학습용
+ * 색은 '의미'로만 사용: accent=행동, mark=내가 채울 곳, 렌즈별 색=아이디어 출처
+ * ------------------------------------------------------------------ */
+@theme {
+  --color-paper: #f6f3ec;
+  --color-surface: #fffdf9;
+  --color-sunken: #efeae0;
+  --color-line: #e3dccf;
+  --color-ink: #23201c;
+  --color-ink-soft: #57524b;
+  --color-ink-mute: #8b847a;
+  --color-accent: #2f6153;
+  --color-accent-strong: #234a3f;
+  --color-accent-soft: #e2ece7;
+  --color-on-accent: #ffffff;
+  --color-mark: #fff0b3;
+  --color-mark-line: #d9b43a;
+  --color-good: #2f7d4f;
+  --color-good-soft: #e3f1e7;
+  --color-bad: #b4413c;
+  --color-bad-soft: #f8e4e1;
+}
+
+@theme inline {
+  --font-read: var(--font-lora), "Iowan Old Style", Georgia, serif;
+}
+
+[data-theme="night"] {
+  --color-paper: #1c1a17;
+  --color-surface: #24211d;
+  --color-sunken: #2c2924;
+  --color-line: #3a362f;
+  --color-ink: #ece6da;
+  --color-ink-soft: #c2baac;
+  --color-ink-mute: #8f877a;
+  --color-accent: #7fbfa8;
+  --color-accent-strong: #a3d6c2;
+  --color-accent-soft: #2a3a34;
+  --color-on-accent: #10201b;
+  --color-mark: #4a4126;
+  --color-mark-line: #c9a640;
+  --color-good: #7cc496;
+  --color-good-soft: #22352a;
+  --color-bad: #e58b84;
+  --color-bad-soft: #3b2522;
+  color-scheme: dark;
+}
+
+/* 빈칸(contentEditable) 플레이스홀더 */
+.blank-field:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-ink-mute);
+  font-style: italic;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.85em;
+}
+
 @layer base {
   html {
     scroll-behavior: auto;

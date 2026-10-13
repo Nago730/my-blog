@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 
-// GET /api/ielts/sessions?userId=xxx
+// sessions: 기존 실전 에세이 기록 / drills: 짧은 드릴(빈칸·이어쓰기 등) 기록
+const ALLOWED = ['sessions', 'drills'] as const;
+const pickCollection = (v: unknown) =>
+  (ALLOWED as readonly string[]).includes(String(v)) ? String(v) : 'sessions';
+
+// GET /api/ielts/sessions?userId=xxx&collection=sessions|drills
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId')?.trim() || 'jun';
+    const col = pickCollection(searchParams.get('collection'));
 
     const db = getAdminDb();
     if (!db) {
@@ -20,7 +26,7 @@ export async function GET(req: Request) {
     const snapshot = await db
       .collection('ielts_users')
       .doc(userId)
-      .collection('sessions')
+      .collection(col)
       .orderBy('createdAt', 'desc')
       .limit(100)
       .get();
@@ -45,11 +51,12 @@ export async function GET(req: Request) {
 }
 
 // POST /api/ielts/sessions
-// Body: { userId, session } or { userId, sessions: [...] }
+// Body: { userId, collection?, session } or { userId, collection?, sessions: [...] }
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const userId = (body.userId || 'jun').trim();
+    const col = pickCollection(body.collection);
 
     const db = getAdminDb();
     if (!db) {
@@ -73,14 +80,14 @@ export async function POST(req: Request) {
     if (body.sessions && Array.isArray(body.sessions)) {
       for (const s of body.sessions) {
         if (!s.id) continue;
-        const docRef = userDocRef.collection('sessions').doc(s.id);
+        const docRef = userDocRef.collection(col).doc(s.id);
         batch.set(docRef, {
           ...s,
           updatedAt: new Date().toISOString(),
         }, { merge: true });
       }
     } else if (body.session && body.session.id) {
-      const docRef = userDocRef.collection('sessions').doc(body.session.id);
+      const docRef = userDocRef.collection(col).doc(body.session.id);
       batch.set(docRef, {
         ...body.session,
         updatedAt: new Date().toISOString(),
@@ -98,12 +105,13 @@ export async function POST(req: Request) {
   }
 }
 
-// DELETE /api/ielts/sessions?userId=xxx&sessionId=yyy
+// DELETE /api/ielts/sessions?userId=xxx&sessionId=yyy&collection=sessions|drills
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId')?.trim() || 'jun';
     const sessionId = searchParams.get('sessionId')?.trim();
+    const col = pickCollection(searchParams.get('collection'));
 
     if (!sessionId) {
       return NextResponse.json({ success: false, error: '삭제할 sessionId가 필요합니다.' }, { status: 400 });
@@ -117,7 +125,7 @@ export async function DELETE(req: Request) {
     await db
       .collection('ielts_users')
       .doc(userId)
-      .collection('sessions')
+      .collection(col)
       .doc(sessionId)
       .delete();
 

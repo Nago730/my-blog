@@ -5,14 +5,17 @@ export interface GeminiRequestOptions {
   model?: string;
   systemInstruction?: string;
   temperature?: number;
+  /** true면 responseMimeType=application/json 으로 요청 (파싱 안정성 ↑) */
+  json?: boolean;
 }
 
 const DEFAULT_MODELS = [
   'gemini-3.5-flash-lite',
   'gemini-flash-latest',
   'gemini-3.8-flash',
+  'gemini-3-flash-preview',
+  'gemini-flash-lite-latest',
   'gemini-2.5-flash-lite',
-  'gemini-2.5-pro',
   'gemini-pro-latest'
 ];
 
@@ -46,6 +49,7 @@ export async function callGemini(
         ],
         generationConfig: {
           temperature: options.temperature ?? 0.7,
+          ...(options.json ? { responseMimeType: 'application/json' } : {}),
         }
       };
 
@@ -77,7 +81,8 @@ export async function callGemini(
       }
 
       const data = await response.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const parts: { text?: string; thought?: boolean }[] = data?.candidates?.[0]?.content?.parts ?? [];
+      const text = parts.filter((p) => !p.thought && p.text).map((p) => p.text).join('');
       
       if (!text) {
         throw new Error('Gemini로부터 유효한 텍스트 응답을 받지 못했습니다.');
