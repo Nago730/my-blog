@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAdminDb } from '@/lib/firebase-admin';
 
 // sessions: 기존 실전 에세이 기록 / drills: 짧은 드릴(빈칸·이어쓰기 등) 기록
-const ALLOWED = ['sessions', 'drills'] as const;
+const ALLOWED = ['sessions', 'drills', 'vocab'] as const;
 const pickCollection = (v: unknown) =>
   (ALLOWED as readonly string[]).includes(String(v)) ? String(v) : 'sessions';
 
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       .doc(userId)
       .collection(col)
       .orderBy('createdAt', 'desc')
-      .limit(100)
+      .limit(col === 'vocab' ? 1000 : 100)
       .get();
 
     const sessions = snapshot.docs.map(doc => doc.data());

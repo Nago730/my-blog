@@ -87,10 +87,27 @@ export interface CriterionFeedback {
   improveKo: string;
 }
 
+export type VocabKind = 'verb' | 'collocation' | 'linker' | 'phrase';
+
 export interface ExpressionTip {
   en: string;
   ko: string;
   example: string;
+  kind?: VocabKind;
+}
+
+/** 내 표현 노트(단어장) 항목 */
+export interface VocabItem {
+  id: string;
+  en: string;
+  ko: string;
+  example: string;
+  kind: VocabKind;
+  topicTitle: string;
+  createdAt: string;
+  mastered: boolean;
+  /** 내가 쓴 글에서 고친 표현이면 원래 틀린 표현 */
+  from?: string;
 }
 
 export interface DrillFeedback {

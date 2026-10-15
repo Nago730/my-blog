@@ -67,7 +67,7 @@ Return JSON with this exact shape:
   "upgraded": "The learner's text rewritten at about Band ${upTo}: KEEP the learner's ideas, structure and as many of their words as possible; fix errors and improve only what is needed. ${targetBand === '6.0' ? 'Keep vocabulary simple and natural; no rare words.' : 'Use natural collocations and some complex sentences.'} Paragraphs separated by \\n\\n.",
   "modelParagraph": { "label": "${isFull ? '모범 서론' : '모범 문단'}", "text": "${isFull ? 'A model introduction (2-3 sentences) for this question that states a CLEAR position and previews the main points; build on learner\'s own ideas.' : 'A model version of this paragraph at Band 7+ that keeps the learner\'s idea.'}", "whyKo": "이 모범안이 왜 더 좋은지 2-3줄" },
   "expressions": [
-    { "en": "reusable phrase for THIS topic", "ko": "뜻", "example": "one short example sentence using it for this topic" }
+    { "kind": "verb|collocation|linker|phrase", "en": "reusable chunk, 2-6 words (e.g. 'lead to a decline in', 'displace workers')", "ko": "뜻", "example": "one short natural example sentence for THIS topic" }
   ],
   "nextStepKo": "다음 연습에서 딱 하나만 신경 쓸 것 (구체적 행동)"
 }
@@ -75,7 +75,7 @@ Rules:
 - "band" is an indicative band for this ${isFull ? 'essay' : 'part'} (0.5 steps) based on IELTS public band descriptors. Each criterion score uses 0.5 steps; band should be consistent with the four scores.
 - "fixes": ${isFull ? '6-10' : '3-6'} items, ordered by importance. Include meaning-level and Konglish problems, not only typos. If the same error type repeats, list the most instructive instances and explain the rule once in whyKo.
 - "original" must be copied EXACTLY from the learner's text (shortest span that contains the problem).
-- "expressions": 6-8 items, topic-specific collocations/linkers the learner can reuse (Band ${targetBand === '6.0' ? '6.5-7' : '7-8'} level), not already used by the learner.
+- "expressions": 10-12 items for the learner's personal vocabulary notebook. Mix kinds: strong VERBS (e.g. displace, boost, undermine), natural COLLOCATIONS (e.g. widespread unemployment, tackle the problem), LINKERS (e.g. To illustrate, As a consequence), and reusable PHRASES. Choose what a native writer would naturally say and what is safe to use at Band ${targetBand === '6.0' ? '6.5-7.0' : '7.0-8.0'}; no rare or showy words. Include better ways to say things the learner expressed awkwardly. Avoid items the learner already used correctly.
 - Do not invent errors. If a sentence is fine, leave it alone.`;
 
     const raw = await callGemini(prompt, { apiKey, model, systemInstruction: system, json: true, temperature: 0.3 });

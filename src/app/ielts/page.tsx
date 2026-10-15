@@ -8,6 +8,7 @@ import {
   History,
   Loader2,
   Moon,
+  NotebookText,
   PenLine,
   Settings,
   Shuffle,
@@ -30,11 +31,14 @@ import {
   type PinnedIdea,
   type Scaffold,
   type TargetBand,
+  type VocabItem,
+  type VocabKind,
 } from '@/lib/ielts-types';
 import LensStep from './_components/LensStep';
 import WriteStep from './_components/WriteStep';
 import ReviewStep from './_components/ReviewStep';
 import HistoryView from './_components/HistoryView';
+import VocabView from './_components/VocabView';
 import { assembleText, ui } from './_components/ui';
 
 /* 기존 키(설정/테마/동기화 코드)는 그대로 재사용 */
@@ -45,6 +49,17 @@ const KEY = {
   uid: 'ielts_sync_user_id_v1',
   band: 'ielts_target_band_v1',
   draft: 'ielts_gym_draft_v1',
+  vocab: 'ielts_vocab_v1',
+};
+
+const VOCAB_KINDS: VocabKind[] = ['verb', 'collocation', 'linker', 'phrase'];
+/** 같은 표현은 기기·회차가 달라도 같은 id가 되도록 결정적으로 생성 (중복 방지) */
+const vocabId = (en: string) =>
+  'v-' + en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
+const saveVocabLocal = (list: VocabItem[]) => {
+  try {
+    localStorage.setItem(KEY.vocab, JSON.stringify(list));
+  } catch {}
 };
 
 const TASK2 = PRESET_TOPICS.filter((t) => t.taskType === 'task2');
@@ -66,7 +81,7 @@ export default function IELTSWritingGym() {
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('');
   const [userId, setUserId] = useState('jun');
-  const [view, setView] = useState<'gym' | 'history'>('gym');
+  const [view, setView] = useState<'gym' | 'history' | 'vocab'>('gym');
   const [modal, setModal] = useState<'topic' | 'settings' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -95,6 +110,7 @@ export default function IELTSWritingGym() {
   const [sessions, setSessions] = useState<DrillSession[]>([]);
   const [openedSession, setOpenedSession] = useState<DrillSession | null>(null);
   const [syncState, setSyncState] = useState<'idle' | 'syncing' | 'synced' | 'off'>('idle');
+  const [vocab, setVocab] = useState<VocabItem[]>([]);
 
   const flashError = (e: unknown) => setError(e instanceof Error ? e.message : String(e));
   const flashNotice = (m: string) => {
@@ -112,25 +128,98 @@ export default function IELTSWritingGym() {
   const loadCloud = useCallback(async (uid: string) => {
     setSyncState('syncing');
     try {
+      // 1. 드릴 기록 동기화 (클라우드 DB가 절대 기준 -> 삭제된 항목이 다른 기기에서 되살아나지 않음)
       const res = await fetch(`/api/ielts/sessions?collection=drills&userId=${encodeURIComponent(uid)}`);
       const data = await res.json();
       if (!data.success) {
         setSyncState('off');
         return;
       }
-      setSessions((prev) => {
-        const map = new Map<string, DrillSession>();
-        prev.forEach((s) => map.set(s.id, s));
-        (data.sessions as DrillSession[]).forEach((s) => map.set(s.id, s));
-        const merged = [...map.values()].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-        saveLocal(merged);
-        return merged;
-      });
+      if (Array.isArray(data.sessions)) {
+        const cloudDrills = (data.sessions as DrillSession[]).sort(
+          (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
+        );
+        setSessions(cloudDrills);
+        saveLocal(cloudDrills);
+      }
       setSyncState('synced');
+
+      // 2. 표현 노트(단어장) 동기화 (클라우드 DB가 절대 기준 -> 삭제한 단어의 좀비 부활 방지)
+      const vres = await fetch(`/api/ielts/sessions?collection=vocab&userId=${encodeURIComponent(uid)}`);
+      const vdata = await vres.json();
+      if (vdata.success && Array.isArray(vdata.sessions)) {
+        const cloudVocab = (vdata.sessions as VocabItem[]).sort(
+          (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
+        );
+        setVocab(cloudVocab);
+        saveVocabLocal(cloudVocab);
+      }
     } catch {
       setSyncState('off');
     }
   }, []);
+
+  /* ---------- 표현 노트(단어장) ---------- */
+  const pushVocab = (items: VocabItem[]) =>
+    fetch('/api/ielts/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, collection: 'vocab', sessions: items }),
+    }).catch(() => {});
+
+  /** 피드백의 추천 표현 + 고친 어휘 교정을 노트에 담는다. 새로 담긴 개수 반환 */
+  const collectVocab = (fb: DrillFeedback, topicTitle: string) => {
+    const known = new Set(vocab.map((v) => v.id));
+    const fresh: VocabItem[] = [];
+    const add = (it: { en: string; ko: string; example: string; kind: VocabKind; from?: string }) => {
+      const en = it.en?.trim();
+      if (!en) return;
+      const id = vocabId(en);
+      if (id === 'v-' || known.has(id)) return;
+      known.add(id);
+      fresh.push({
+        id,
+        en,
+        ko: it.ko?.trim() || '',
+        example: it.example?.trim() || '',
+        kind: it.kind,
+        topicTitle,
+        createdAt: new Date().toISOString(),
+        mastered: false,
+        from: it.from,
+      });
+    };
+    (fb.expressions ?? []).forEach((e) =>
+      add({ en: e.en, ko: e.ko, example: e.example, kind: e.kind && VOCAB_KINDS.includes(e.kind) ? e.kind : 'phrase' })
+    );
+    // 내가 쓴 어휘를 고친 짧은 교정은 '내가 쓴 표현'과 함께 저장
+    fb.fixes
+      .filter((f) => f.type === 'vocabulary' && f.corrected.trim().split(/\s+/).length <= 6)
+      .forEach((f) => add({ en: f.corrected, ko: f.whyKo, example: '', kind: 'collocation', from: f.original }));
+    if (!fresh.length) return 0;
+    const next = [...fresh, ...vocab];
+    setVocab(next);
+    saveVocabLocal(next);
+    pushVocab(fresh);
+    return fresh.length;
+  };
+
+  const toggleVocabMastered = (id: string) => {
+    const next = vocab.map((v) => (v.id === id ? { ...v, mastered: !v.mastered } : v));
+    setVocab(next);
+    saveVocabLocal(next);
+    const changed = next.find((v) => v.id === id);
+    if (changed) pushVocab([changed]);
+  };
+
+  const deleteVocab = (id: string) => {
+    const next = vocab.filter((v) => v.id !== id);
+    setVocab(next);
+    saveVocabLocal(next);
+    fetch(`/api/ielts/sessions?collection=vocab&userId=${encodeURIComponent(userId)}&sessionId=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }).catch(() => {});
+  };
 
   const uploadSession = (s: DrillSession) =>
     fetch('/api/ielts/sessions', {
@@ -156,6 +245,8 @@ export default function IELTSWritingGym() {
       setUserId(uid);
       const list = JSON.parse(localStorage.getItem(KEY.drills) || '[]');
       if (Array.isArray(list)) setSessions(list);
+      const vlist = JSON.parse(localStorage.getItem(KEY.vocab) || '[]');
+      if (Array.isArray(vlist)) setVocab(vlist);
 
       const d = JSON.parse(localStorage.getItem(KEY.draft) || 'null');
       if (d?.topic) {
@@ -326,6 +417,8 @@ export default function IELTSWritingGym() {
       setSessions(next);
       saveLocal(next);
       uploadSession(s);
+      const added = collectVocab(d.feedback, topic.title);
+      if (added) flashNotice(`표현 ${added}개를 내 표현 노트에 담았어요`);
       setFeedback(d.feedback);
       setSubmittedText(assembled);
       setSessionId(s.id);
@@ -410,6 +503,17 @@ export default function IELTSWritingGym() {
               ))}
             </div>
             <button
+              id="nav-vocab"
+              onClick={() => setView(view === 'vocab' ? 'gym' : 'vocab')}
+              className={`${ui.btnGhost} ${view === 'vocab' ? 'bg-sunken text-ink' : ''}`}
+            >
+              <NotebookText className="h-4 w-4" />
+              <span className="hidden sm:inline">표현 노트</span>
+              {vocab.length > 0 && (
+                <span className="rounded-full bg-accent-soft px-1.5 text-[10px] font-semibold text-accent">{vocab.length}</span>
+              )}
+            </button>
+            <button
               id="nav-history"
               onClick={() => {
                 setView(view === 'history' ? 'gym' : 'history');
@@ -439,7 +543,9 @@ export default function IELTSWritingGym() {
       </header>
 
       <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
-        {view === 'history' ? (
+        {view === 'vocab' ? (
+          <VocabView items={vocab} onToggleMastered={toggleVocabMastered} onDelete={deleteVocab} />
+        ) : view === 'history' ? (
           openedSession && openedSession.feedback ? (
             <>
               <button onClick={() => setOpenedSession(null)} className={`${ui.btnGhost} self-start`}>
