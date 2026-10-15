@@ -1,9 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCircle2, Keyboard, RotateCcw, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, BookMarked, Check, CheckCircle2, Keyboard, RotateCcw, Sparkles, Target } from 'lucide-react';
 import { PART_META, type DrillFeedback, type Fix, type Part, type TargetBand } from '@/lib/ielts-types';
 import { ui } from './ui';
+
+const CRITERIA_LABEL: Record<string, { name: string; sub: string }> = {
+  TR: { name: 'Task Response', sub: '과제 수행' },
+  CC: { name: 'Coherence & Cohesion', sub: '일관성·결속성' },
+  LR: { name: 'Lexical Resource', sub: '어휘' },
+  GRA: { name: 'Grammar Range & Accuracy', sub: '문법' },
+};
 
 interface Props {
   feedback: DrillFeedback;
@@ -25,6 +32,16 @@ const FIX_TYPE: Record<Fix['type'], string> = {
   cohesion: '연결',
   idea: '내용',
 };
+
+/** 교정을 위치(서론/본론/결론)별로 묶되, 번호는 중요도 순서 그대로 유지 */
+function groupFixes(fixes: Fix[]): [string, { fix: Fix; n: number }[]][] {
+  const map = new Map<string, { fix: Fix; n: number }[]>();
+  fixes.forEach((fix, i) => {
+    const loc = fix.location?.trim() || '';
+    map.set(loc, [...(map.get(loc) ?? []), { fix, n: i + 1 }]);
+  });
+  return [...map.entries()];
+}
 
 export default function ReviewStep(p: Props) {
   const fb = p.feedback;
@@ -63,35 +80,112 @@ export default function ReviewStep(p: Props) {
         </div>
       </div>
 
-      {/* 핵심 교정 */}
+      {/* 4대 채점 기준 */}
+      {fb.criteria && fb.criteria.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {fb.criteria.map((c) => {
+            const meta = CRITERIA_LABEL[c.key];
+            const low = c.score < target;
+            return (
+              <div key={c.key} className={`${ui.card} flex flex-col gap-3 p-5`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-sm font-bold text-ink">{meta?.name ?? c.key}</span>
+                    <span className="ml-2 text-xs text-ink-mute">{meta?.sub}</span>
+                  </div>
+                  <span
+                    className={`rounded-lg px-2.5 py-1 font-mono text-sm font-bold ${
+                      low ? 'bg-bad-soft text-bad' : 'bg-good-soft text-good'
+                    }`}
+                  >
+                    {c.score.toFixed(1)}
+                  </span>
+                </div>
+                <p className="flex gap-2 text-sm leading-relaxed text-ink-soft">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-good" />
+                  {c.strengthKo}
+                </p>
+                <p className="flex gap-2 text-sm leading-relaxed text-ink">
+                  <Target className="mt-0.5 h-4 w-4 shrink-0 text-mark-line" />
+                  {c.improveKo}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 핵심 교정 (문단별 그룹) */}
       {fb.fixes.length > 0 && (
         <div className={`${ui.card} p-5 sm:p-6`}>
           <div className="mb-4 flex items-baseline justify-between">
-            <h3 className="text-base font-bold text-ink">이것만 고치면 됩니다</h3>
-            <span className="text-xs text-ink-mute">중요한 순서</span>
+            <h3 className="text-base font-bold text-ink">문장별 교정</h3>
+            <span className="text-xs text-ink-mute">{fb.fixes.length}개 · 중요한 순서</span>
           </div>
-          <ol className="flex flex-col gap-4">
-            {fb.fixes.map((f, i) => (
-              <li key={i} className="grid gap-2 sm:grid-cols-[28px_1fr]">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sunken text-xs font-bold text-ink-soft">
-                  {i + 1}
-                </span>
-                <div className="flex flex-col gap-1.5">
-                  <div className="font-read text-[16px] leading-relaxed">
-                    <span className="rounded bg-bad-soft px-1 text-bad line-through decoration-bad/60">{f.original}</span>
-                    <ArrowRight className="mx-2 inline h-3.5 w-3.5 text-ink-mute" />
-                    <span className="rounded bg-good-soft px-1 text-good">{f.corrected}</span>
-                  </div>
-                  <p className="text-sm text-ink-soft">
-                    <span className="mr-1.5 rounded border border-line px-1.5 py-px text-[10px] font-semibold text-ink-mute">
-                      {FIX_TYPE[f.type] ?? f.type}
-                    </span>
-                    {f.whyKo}
-                  </p>
-                </div>
-              </li>
+          <div className="flex flex-col gap-6">
+            {groupFixes(fb.fixes).map(([loc, list]) => (
+              <div key={loc} className="flex flex-col gap-4">
+                {loc && (
+                  <span className="self-start rounded-md bg-sunken px-2 py-0.5 text-xs font-semibold text-ink-soft">{loc}</span>
+                )}
+                <ol className="flex flex-col gap-4">
+                  {list.map(({ fix: f, n }) => (
+                    <li key={n} className="grid gap-2 sm:grid-cols-[28px_1fr]">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sunken text-xs font-bold text-ink-soft">
+                        {n}
+                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="font-read text-[16px] leading-relaxed">
+                          <span className="rounded bg-bad-soft px-1 text-bad line-through decoration-bad/60">{f.original}</span>
+                          <ArrowRight className="mx-2 inline h-3.5 w-3.5 text-ink-mute" />
+                          <span className="rounded bg-good-soft px-1 text-good">{f.corrected}</span>
+                        </div>
+                        <p className="text-sm leading-relaxed text-ink-soft">
+                          <span className="mr-1.5 rounded border border-line px-1.5 py-px text-[10px] font-semibold text-ink-mute">
+                            {FIX_TYPE[f.type] ?? f.type}
+                          </span>
+                          {f.whyKo}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             ))}
-          </ol>
+          </div>
+        </div>
+      )}
+
+      {/* 모범 문단 */}
+      {fb.modelParagraph && (
+        <div className={`${ui.card} border-accent/40 p-5 sm:p-6`}>
+          <span className={`${ui.label} !text-accent`}>
+            <Sparkles className="mr-1 inline h-3 w-3" />
+            {fb.modelParagraph.label}
+          </span>
+          <p className="mt-3 font-read text-[17px] leading-[1.9] text-ink">{fb.modelParagraph.text}</p>
+          <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-ink-soft">{fb.modelParagraph.whyKo}</p>
+        </div>
+      )}
+
+      {/* 이 주제에 쓸 표현 */}
+      {fb.expressions && fb.expressions.length > 0 && (
+        <div className={`${ui.card} p-5 sm:p-6`}>
+          <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-ink">
+            <BookMarked className="h-4 w-4 text-accent" />
+            이 주제에 바로 쓸 수 있는 표현
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {fb.expressions.map((e, i) => (
+              <div key={i} className="rounded-xl bg-paper p-3.5">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-read text-[16px] font-semibold text-ink">{e.en}</span>
+                  <span className="text-xs text-ink-mute">{e.ko}</span>
+                </div>
+                <p className="mt-1 font-read text-sm italic leading-relaxed text-ink-soft">{e.example}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

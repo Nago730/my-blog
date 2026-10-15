@@ -76,6 +76,21 @@ export interface Fix {
   corrected: string;
   whyKo: string;
   type: 'grammar' | 'vocabulary' | 'cohesion' | 'idea';
+  /** 예: '서론', '본론 1', '결론' */
+  location?: string;
+}
+
+export interface CriterionFeedback {
+  key: 'TR' | 'CC' | 'LR' | 'GRA';
+  score: number;
+  strengthKo: string;
+  improveKo: string;
+}
+
+export interface ExpressionTip {
+  en: string;
+  ko: string;
+  example: string;
 }
 
 export interface DrillFeedback {
@@ -85,6 +100,10 @@ export interface DrillFeedback {
   fixes: Fix[];
   upgraded: string;
   nextStepKo: string;
+  /** 신규 필드 (이전 기록에는 없을 수 있음) */
+  criteria?: CriterionFeedback[];
+  modelParagraph?: { label: string; text: string; whyKo: string } | null;
+  expressions?: ExpressionTip[];
 }
 
 export interface DrillSession {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { callGemini, extractJSON } from '@/lib/gemini';
-import type { DrillFeedback, Mode, Part, TargetBand } from '@/lib/ielts-types';
+import type { CriterionFeedback, DrillFeedback, Mode, Part, TargetBand } from '@/lib/ielts-types';
 
 const PART_EN: Record<Part, string> = {
   intro: 'an introduction paragraph',
@@ -35,9 +35,11 @@ export async function POST(req: Request) {
     }
 
     const upTo = targetBand === '6.0' ? '6.5' : '7.5';
+    const isFull = part === 'full';
 
-    const system = `You are a kind but honest IELTS Writing examiner and coach for a Korean learner whose target is Band ${targetBand}.
-Focus on the FEW changes that move this learner toward Band ${targetBand}. Do not overwhelm.
+    const system = `You are a certified, experienced IELTS Writing examiner and a warm, specific personal coach for a Korean learner whose target is Band ${targetBand} (long-term 7.0).
+Be thorough and concrete like a paid 1:1 tutor: quote the learner's own words, explain WHY in Korean, and teach reusable rules (not just fixes).
+Catch EVERYTHING that matters: spelling, articles, subject-verb agreement, countability (e.g. "works" vs "work"), transitive/intransitive verbs, collocations, Korean-style literal phrasing (Konglish), vague or illogical statements, repeated linking words, thesis clarity.
 All explanations in Korean. Quoted English stays in English. Output JSON only.`;
 
     const prompt = `Question: "${topic.prompt}"
@@ -48,24 +50,48 @@ Learner's text (${words} words):
 ${text}
 """
 
-Return JSON:
+Return JSON with this exact shape:
 {
-  "band": 6.0,
-  "verdictKo": "한 줄 총평 (격려 + 핵심 문제 하나)",
-  "goodKo": ["잘한 점 1-3개 (구체적으로)"],
+  "band": 6.5,
+  "verdictKo": "총평 2-3문장: 격려 + 현재 수준의 근거 + 7.0으로 가기 위한 핵심 한 줄",
+  "goodKo": ["구체적인 강점 2-4개 (학습자가 쓴 표현을 인용하며)"],
+  "criteria": [
+    { "key": "TR",  "score": 7.0, "strengthKo": "과제 수행 강점 (인용 포함)", "improveKo": "과제 수행 개선점 (구체적, 예: 서론 입장이 모호함 → 결론의 해결책을 서론에도 예고)" },
+    { "key": "CC",  "score": 7.0, "strengthKo": "...", "improveKo": "... (반복된 연결어는 대체 표현 제시: 예 For example → For instance / To illustrate)" },
+    { "key": "LR",  "score": 6.0, "strengthKo": "...", "improveKo": "... (직역투/부자연스러운 어휘를 짚기)" },
+    { "key": "GRA", "score": 6.0, "strengthKo": "...", "improveKo": "... (반복되는 문법 오류 유형을 규칙으로 정리)" }
+  ],
   "fixes": [
-    { "original": "exact phrase/sentence from learner text", "corrected": "fixed version", "whyKo": "짧은 이유", "type": "grammar|vocabulary|cohesion|idea" }
+    { "location": "서론 | 본론 1 | 본론 2 | 결론 | 문단", "original": "exact phrase or sentence copied from learner text", "corrected": "better version", "whyKo": "왜 고쳐야 하는지 + 기억할 규칙 1줄", "type": "grammar|vocabulary|cohesion|idea" }
   ],
   "upgraded": "The learner's text rewritten at about Band ${upTo}: KEEP the learner's ideas, structure and as many of their words as possible; fix errors and improve only what is needed. ${targetBand === '6.0' ? 'Keep vocabulary simple and natural; no rare words.' : 'Use natural collocations and some complex sentences.'} Paragraphs separated by \\n\\n.",
-  "nextStepKo": "다음 연습에서 딱 하나만 신경 쓸 것"
+  "modelParagraph": { "label": "${isFull ? '모범 서론' : '모범 문단'}", "text": "${isFull ? 'A model introduction (2-3 sentences) for this question that states a CLEAR position and previews the main points; build on learner\'s own ideas.' : 'A model version of this paragraph at Band 7+ that keeps the learner\'s idea.'}", "whyKo": "이 모범안이 왜 더 좋은지 2-3줄" },
+  "expressions": [
+    { "en": "reusable phrase for THIS topic", "ko": "뜻", "example": "one short example sentence using it for this topic" }
+  ],
+  "nextStepKo": "다음 연습에서 딱 하나만 신경 쓸 것 (구체적 행동)"
 }
 Rules:
-- "band" is an indicative band for this ${part === 'full' ? 'essay' : 'part'} (0.5 steps), judged by IELTS descriptors.
-- 2-5 fixes, most important first. Prefer errors that actually cost marks at Band ${targetBand}.
-- "original" must be copied exactly from the learner text.`;
+- "band" is an indicative band for this ${isFull ? 'essay' : 'part'} (0.5 steps) based on IELTS public band descriptors. Each criterion score uses 0.5 steps; band should be consistent with the four scores.
+- "fixes": ${isFull ? '6-10' : '3-6'} items, ordered by importance. Include meaning-level and Konglish problems, not only typos. If the same error type repeats, list the most instructive instances and explain the rule once in whyKo.
+- "original" must be copied EXACTLY from the learner's text (shortest span that contains the problem).
+- "expressions": 6-8 items, topic-specific collocations/linkers the learner can reuse (Band ${targetBand === '6.0' ? '6.5-7' : '7-8'} level), not already used by the learner.
+- Do not invent errors. If a sentence is fine, leave it alone.`;
 
     const raw = await callGemini(prompt, { apiKey, model, systemInstruction: system, json: true, temperature: 0.3 });
     const parsed = extractJSON<DrillFeedback>(raw);
+
+    const KEYS = ['TR', 'CC', 'LR', 'GRA'];
+    const criteria: CriterionFeedback[] = Array.isArray(parsed.criteria)
+      ? parsed.criteria
+          .filter((c) => KEYS.includes(c?.key))
+          .map((c) => ({
+            key: c.key,
+            score: Number(c.score) || 0,
+            strengthKo: c.strengthKo ?? '',
+            improveKo: c.improveKo ?? '',
+          }))
+      : [];
 
     const feedback: DrillFeedback = {
       band: Number(parsed.band) || 0,
@@ -74,6 +100,9 @@ Rules:
       fixes: Array.isArray(parsed.fixes) ? parsed.fixes : [],
       upgraded: parsed.upgraded ?? '',
       nextStepKo: parsed.nextStepKo ?? '',
+      criteria,
+      modelParagraph: parsed.modelParagraph?.text ? parsed.modelParagraph : null,
+      expressions: Array.isArray(parsed.expressions) ? parsed.expressions : [],
     };
 
     return NextResponse.json({ success: true, feedback });
